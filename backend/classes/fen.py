@@ -26,7 +26,7 @@ class Fen_String():
         for rank in board:
             num = 0
             for piece_name in rank:
-                if piece_name == ".":
+                if piece_name.__class__ == No_Piece:
                     num += 1
                 else:
                     if num:
@@ -50,6 +50,7 @@ if __name__ == "__main__":
     board = Fen_String(a)
     print(board.board)
     print(board.info)
-    b = Fen_String.encryptFen(board.board, board.info)
+    b = Fen_String.encryptFen(board)
     print(b)
     assert a == b
+    print(Piece.translate("q"))

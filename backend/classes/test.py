@@ -1,14 +1,12 @@
 #! /bin/python3
 
-from pieces import Vector
+from pieces import *
+from fen import *
 
-ls = list()
-for i in (-1, 0, 1):
-    for j in (-1, 0,  1):
-        if abs(i) != abs(j):
-            ls.append(Vector((i, j)))
-print(ls)
-print(len(ls))
+def func(fen_str="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"):
+    fen = Fen_String(fen_str)
+    board = fen.board
+    info = fen.info
+    return board, info
 
-print(Vector((0, 1)) + Vector((1, 2)))
-
+print(Piece.translate("q"))

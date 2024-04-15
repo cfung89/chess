@@ -22,10 +22,15 @@ class Board():
     def move(self, move):
         o_rank, o_file = Board.tile_to_index(move[:2])
         t_rank, t_file = Board.tile_to_index(move[2:])
-        print((o_rank, o_file), (t_rank, t_file))
         if move in self.get_legal_moves():
             self.board[t_rank][t_file] = self.board[o_rank][o_file]
             self.board[o_rank][o_file] = No_Piece()
+
+        #update info
+        if self.board[o_rank][o_file].__class__ == Pawn and (o_rank == 1 or o_rank == 6) and (t_rank == 3 or t_rank == 4):
+            self.info["en_passant"] = move[2:]
+        else:
+            self.info["en_passant"] = "-"
 
     def get_legal_moves(self):
         legal_moves = list()
@@ -62,10 +67,18 @@ class Board():
 
 if __name__ == "__main__":
     a = Board()
+    """
     print(a)
     print(a.info)
     b = a.get_legal_moves()
     print(b, len(b), "\n")
+    a.move("d2d4")
+    a.move("e7e6")
+    a.move("d4d5")
+    a.move("c7c5")
+    print(a)
+    print(a.info)
+    b = a.get_legal_moves()
 
     ex = "r4rk1/pppq1p1p/2n1pnp1/3p1b2/3P4/2NBPN2/PPPQ1PPP/R3K2R w KQ - 0 1"
     assert Fen_String.encryptFen(a)
@@ -79,3 +92,4 @@ if __name__ == "__main__":
     print(a)
     b = a.get_legal_moves()
     print(b, len(b))
+    """

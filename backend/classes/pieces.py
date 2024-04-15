@@ -1,5 +1,7 @@
 #! /bin/python3
 
+from board import *
+
 BLACK = 0
 WHITE = 1
 
@@ -69,8 +71,9 @@ class Pawn(Piece):
         self.not_moved = 1
 
     def generate_moves(self, board_obj, position):
-        board = board_obj.board
         moves = list()
+        board = board_obj.board
+        en_passant = board_obj.info[2]
         rank, file = position[0], position[1]
         if self.colour:
             for forward in range(2 if position[0]==6 else 1):
@@ -84,6 +87,13 @@ class Pawn(Piece):
                 moves.append((rank, file-1))
             if rank >= 0 and file+1 <= 7 and not isinstance(board[rank][file+1], No_Piece) and board[rank][file+1].colour != self.colour:
                 moves.append((rank, file+1))
+            if en_passant != "-":
+                pawn = tile_to_index(en_passant)
+                if position[0] == pawn[0]:
+                    if position[1] == pawn[1]-1:
+                        moves.append((position[0]-1, position[1]+1))
+                    elif position[1] == pawn[1]+1:
+                        moves.append((position[0]-1, position[1]-1))
         else:
             for forward in range(2 if position[0]==1 else 1):
                 rank += 1
@@ -96,6 +106,13 @@ class Pawn(Piece):
                 moves.append((rank, file-1))
             if rank <= 7 and file+1 <= 7 and not isinstance(board[rank][file+1], No_Piece) and board[rank][file+1].colour != self.colour:
                 moves.append((rank, file+1))
+            if en_passant != "-":
+                pawn = tile_to_index(en_passant)
+                if position[0] == pawn[0]:
+                    if position[1] == pawn[1]-1:
+                        moves.append((position[0]+1, position[1]+1))
+                    elif position[1] == pawn[1]+1:
+                        moves.append((position[0]+1, position[1]-1))
         return moves
 
 class Rook(Piece):
