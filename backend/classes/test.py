@@ -9,4 +9,5 @@ def func(fen_str="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"):
     info = fen.info
     return board, info
 
+print(func())
 print(Piece.translate("q"))

@@ -19,18 +19,51 @@ class Board():
             string += str(rank) + "\n"
         return string
     
+    def get_info(self):
+        fen_info = self.info.copy()
+        fen_info.pop("king_position")
+        return fen_info
+
+    def get_king_position(self):
+        return self.info["king_position"]
+
     def move(self, move):
         o_rank, o_file = Board.tile_to_index(move[:2])
         t_rank, t_file = Board.tile_to_index(move[2:])
+        piece = self.board[o_rank][o_file]
+        capture = self.board[t_rank][t_file]
+
         if move in self.get_legal_moves():
+            if type(piece) == Pawn:
+                if (o_rank == 1 or o_rank == 6) and (t_rank == 3 or t_rank == 4):
+                    self.info["en_passant"] = move[2:]
+                else:
+                    self.info["en_passant"] = "-"
+            elif type(piece) == King:
+                if self.info["castling"] != "-":
+                    if str(piece) in self.info["castling"]:
+                        if str(piece).isupper():
+                            self.info["castling"] = self.info["castling"][2:]
+                        else:
+                            self.info["castling"] = self.info["castling"][:2]
+                    if not self.info["castling"]:
+                        self.info["castling"] = "-"
+            
+            if capture != No_Piece or type(piece) == Pawn:
+                self.info["halfmove"] = 0
+            else:
+                self.info["halfway"] += 1
+
+            if piece.colour == BLACK:
+                self.info["fullmove"] += 1
+
+            self.info["side"] = BLACK if self.info["side"] == WHITE else WHITE
+
             self.board[t_rank][t_file] = self.board[o_rank][o_file]
             self.board[o_rank][o_file] = No_Piece()
 
-        #update info
-        if self.board[o_rank][o_file].__class__ == Pawn and (o_rank == 1 or o_rank == 6) and (t_rank == 3 or t_rank == 4):
-            self.info["en_passant"] = move[2:]
         else:
-            self.info["en_passant"] = "-"
+            raise ValueError("Invalid move")
 
     def get_legal_moves(self):
         legal_moves = list()
@@ -67,11 +100,11 @@ class Board():
 
 if __name__ == "__main__":
     a = Board()
-    """
     print(a)
     print(a.info)
     b = a.get_legal_moves()
     print(b, len(b), "\n")
+    print("En passant test")
     a.move("d2d4")
     a.move("e7e6")
     a.move("d4d5")
@@ -79,10 +112,11 @@ if __name__ == "__main__":
     print(a)
     print(a.info)
     b = a.get_legal_moves()
+    print(b, len(b), "\n")
 
     ex = "r4rk1/pppq1p1p/2n1pnp1/3p1b2/3P4/2NBPN2/PPPQ1PPP/R3K2R w KQ - 0 1"
-    assert Fen_String.encryptFen(a)
     a = Board(ex)
+    assert Fen_String.encryptFen(a) == ex
     print(a)
     print(a.info)
     b = a.get_legal_moves()
@@ -92,4 +126,3 @@ if __name__ == "__main__":
     print(a)
     b = a.get_legal_moves()
     print(b, len(b))
-    """

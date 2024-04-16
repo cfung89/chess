@@ -1,7 +1,5 @@
 #! /bin/python3
 
-from board import *
-
 BLACK = 0
 WHITE = 1
 
@@ -18,10 +16,7 @@ class Piece(object):
         self.colour = colour
 
     def __repr__(self):
-        if self.colour:
-            return f"{self.name}"
-        else:
-            return f"{self.name}"
+        return f"{self.name}"
 
     @staticmethod
     def translate(name):
@@ -44,6 +39,19 @@ class Piece(object):
             return Queen(colour)
         else:
             return King(colour)
+
+    @staticmethod
+    def tile_to_index(tile):
+        conversion = dict(zip("abcdefgh", [0, 1, 2, 3, 4, 5, 6, 7]))
+        file = conversion[tile[0]]
+        rank = abs(int(tile[1])-8)
+        return (rank, file)
+
+    @staticmethod
+    def index_to_tile(index):
+        rank = str(abs(index[0]-8))
+        file = Board.invert[index[1]]
+        return file + rank
 
     def generate_moves(self, board_obj, position):
         board = board_obj.board
@@ -73,7 +81,7 @@ class Pawn(Piece):
     def generate_moves(self, board_obj, position):
         moves = list()
         board = board_obj.board
-        en_passant = board_obj.info[2]
+        en_passant = board_obj.info["en_passant"]
         rank, file = position[0], position[1]
         if self.colour:
             for forward in range(2 if position[0]==6 else 1):
@@ -88,7 +96,7 @@ class Pawn(Piece):
             if rank >= 0 and file+1 <= 7 and not isinstance(board[rank][file+1], No_Piece) and board[rank][file+1].colour != self.colour:
                 moves.append((rank, file+1))
             if en_passant != "-":
-                pawn = tile_to_index(en_passant)
+                pawn = Piece.tile_to_index(en_passant)
                 if position[0] == pawn[0]:
                     if position[1] == pawn[1]-1:
                         moves.append((position[0]-1, position[1]+1))
@@ -107,7 +115,7 @@ class Pawn(Piece):
             if rank <= 7 and file+1 <= 7 and not isinstance(board[rank][file+1], No_Piece) and board[rank][file+1].colour != self.colour:
                 moves.append((rank, file+1))
             if en_passant != "-":
-                pawn = tile_to_index(en_passant)
+                pawn = Piece.tile_to_index(en_passant)
                 if position[0] == pawn[0]:
                     if position[1] == pawn[1]-1:
                         moves.append((position[0]+1, position[1]+1))
@@ -181,11 +189,10 @@ class Queen(Piece):
         a, b = Rook(WHITE), Bishop(WHITE)
         self.directions = a.directions + b.directions
 
-class King(Piece):
+class King():
     def __init__(self, colour):
-        super().__init__(colour)
+        self.colour = colour
         self.name = "K" if colour else "k"
-        self.has_moved = False
         self.directions = [Vector((-1, -1)), Vector((-1, 0)), Vector((-1, 1)), Vector((0, -1)), Vector((0, 1)), Vector((1, -1)), Vector((1, 0)), Vector((1, 1))]
 
         """
@@ -195,6 +202,8 @@ class King(Piece):
                 self.directions.append(Vector((i, j)))
         self.directions.remove(Vector((0, 0))
         """
+    def __repr__(self):
+        return f"{self.name}"
 
     def generate_moves(self, board_obj, position):
         board = board_obj.board
