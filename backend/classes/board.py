@@ -12,8 +12,9 @@ class Board():
         fen = Fen_String(fen_str)
         self.board = fen.board
         self.info = fen.info
+        self.timeline = list()
 
-    def __str__(self):
+    def __repr__(self):
         string = str()
         for rank in self.board:
             string += str(rank) + "\n"
@@ -52,7 +53,7 @@ class Board():
             if capture != No_Piece or type(piece) == Pawn:
                 self.info["halfmove"] = 0
             else:
-                self.info["halfway"] += 1
+                self.info["halfmove"] += 1
 
             if piece.colour == BLACK:
                 self.info["fullmove"] += 1
@@ -75,14 +76,25 @@ class Board():
                     for move in possible_moves:
                         legal_moves.append(str(Board.index_to_tile(position)) + str(Board.index_to_tile(move)))
         return legal_moves
+    
+    def check(self, king_pos, attacked):
+        for colour in king_pos:
+            if colour in attacked:
+                return colour
+        return None
 
-    def non_empty_indexes(self):
-        ls = list()
-        for rank in range(8):
-            for file in range(8):
-                if not isinstance(self.board[rank][file], No_Piece):
-                    ls.append((rank, file))
-        return ls
+    def game_over(self):
+        king_pos = self.get_king_position()
+        attacked = self.attacked_squares()
+        isChecked = self.check(king_pos, attacked)
+        if isChecked is not None:
+            if not self.board[king_pos[0]][king_pos[1]].generate_moves(self, position):
+                return Game.get_opponent(isChecked)
+        if not self.get_legal_moves():
+            return 2        #stalemate
+        if self.info["halfmove"] >= 100:        #and side to move has at least one legal move
+            return 3    #50-move draw
+        return False
 
 
     @staticmethod
