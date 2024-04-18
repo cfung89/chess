@@ -1,7 +1,10 @@
 #! /bin/python3
 
-class Game():
-    def __init__(self):
-        pass
+from board import *
+from pieces import *
 
-    def 
+class Game():
+    def __init__(self, fen, user_colour):
+        self.human = user_colour
+        self.computer = Game.get_opponent(self.human)
+        self.positions = list()

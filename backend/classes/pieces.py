@@ -1,5 +1,7 @@
 #! /bin/python3
 
+from squares import *
+
 BLACK = 0
 WHITE = 1
 
@@ -40,20 +42,9 @@ class Piece(object):
         else:
             return King(colour)
 
-    @staticmethod
-    def tile_to_index(tile):
-        conversion = dict(zip("abcdefgh", [0, 1, 2, 3, 4, 5, 6, 7]))
-        file = conversion[tile[0]]
-        rank = abs(int(tile[1])-8)
-        return (rank, file)
-
-    @staticmethod
-    def index_to_tile(index):
-        rank = str(abs(index[0]-8))
-        file = Board.invert[index[1]]
-        return file + rank
 
     def generate_moves(self, board_obj, position):
+        """Generates moves for Rook, Bishop, and Queen"""
         board = board_obj.board
         moves = list()
         directions = self.directions
@@ -62,12 +53,13 @@ class Piece(object):
             changing += direction
             while 0 <= changing[0] <= 7 and 0 <= changing[1] <= 7:
                 rank, file = changing[0], changing[1]
-                if isinstance(board[rank][file], No_Piece):
+                if type(board[rank][file]) == No_Piece:
                     moves.append((rank, file))
                     changing += direction
                     continue
                 elif board[rank][file].colour != self.colour:
                     moves.append((rank, file))
+                    piece = board[rank + direction[0]][file + direction[1]]
                 break
         return moves
 
@@ -84,38 +76,48 @@ class Pawn(Piece):
         en_passant = board_obj.info["en_passant"]
         rank, file = position[0], position[1]
         if self.colour:
+            #Check for push
             for forward in range(2 if position[0]==6 else 1):
                 rank -= 1
-                if rank >= 0 and isinstance(board[rank][file], No_Piece):
+                if rank >= 0 and type(board[rank][file]) == No_Piece:
                     moves.append((rank, file))
                 else:
                     break
+
+            #Check for capture
             rank = position[0]-1
-            if rank >= 0 and file-1 >= 0 and not isinstance(board[rank][file-1], No_Piece) and board[rank][file-1].colour != self.colour:
+            if rank >= 0 and file-1 >= 0 and type(board[rank][file-1]) != No_Piece and board[rank][file-1].colour != self.colour:
                 moves.append((rank, file-1))
-            if rank >= 0 and file+1 <= 7 and not isinstance(board[rank][file+1], No_Piece) and board[rank][file+1].colour != self.colour:
+            if rank >= 0 and file+1 <= 7 and type(board[rank][file+1]) != No_Piece and board[rank][file+1].colour != self.colour:
                 moves.append((rank, file+1))
+
+            #Check for en passant
             if en_passant != "-":
-                pawn = Piece.tile_to_index(en_passant)
+                pawn = Square.tile_to_index(en_passant)
                 if position[0] == pawn[0]:
                     if position[1] == pawn[1]-1:
                         moves.append((position[0]-1, position[1]+1))
                     elif position[1] == pawn[1]+1:
                         moves.append((position[0]-1, position[1]-1))
         else:
+            #Check for push
             for forward in range(2 if position[0]==1 else 1):
                 rank += 1
-                if rank <= 7 and isinstance(board[rank][file], No_Piece):
+                if rank <= 7 and type(board[rank][file]) == No_Piece:
                     moves.append((rank, file))
                 else:
                     break
+
+            #Check for capture
             rank = position[0]+1
-            if rank <= 7 and file-1 >= 0 and not isinstance(board[rank][file-1], No_Piece) and board[rank][file-1].colour != self.colour:
+            if rank <= 7 and file-1 >= 0 and type(board[rank][file-1]) != No_Piece and board[rank][file-1].colour != self.colour:
                 moves.append((rank, file-1))
-            if rank <= 7 and file+1 <= 7 and not isinstance(board[rank][file+1], No_Piece) and board[rank][file+1].colour != self.colour:
+            if rank <= 7 and file+1 <= 7 and type(board[rank][file+1]) != No_Piece and board[rank][file+1].colour != self.colour:
                 moves.append((rank, file+1))
+
+            #Check for en passant
             if en_passant != "-":
-                pawn = Piece.tile_to_index(en_passant)
+                pawn = Square.tile_to_index(en_passant)
                 if position[0] == pawn[0]:
                     if position[1] == pawn[1]-1:
                         moves.append((position[0]+1, position[1]+1))
@@ -127,7 +129,6 @@ class Rook(Piece):
     def __init__(self, colour):
         super().__init__(colour)
         self.name = "R" if colour else "r"
-        self.not_moved = 1
         self.directions = [Vector((-1, 0)), Vector((1, 0)), Vector((0, -1)), Vector((0, 1))]
 
         """
@@ -162,7 +163,7 @@ class Knight(Piece):
             changing += direction
             if 0 <= changing[0] <= 7 and 0 <= changing[1] <= 7:
                 rank, file = changing[0], changing[1]
-                if isinstance(board[rank][file], No_Piece):
+                if type(board[rank][file]) == No_Piece:
                     moves.append((rank, file))
                     changing += direction
                     continue
@@ -189,9 +190,9 @@ class Queen(Piece):
         a, b = Rook(WHITE), Bishop(WHITE)
         self.directions = a.directions + b.directions
 
-class King():
+class King(Piece):
     def __init__(self, colour):
-        self.colour = colour
+        super().__init__(colour)
         self.name = "K" if colour else "k"
         self.directions = [Vector((-1, -1)), Vector((-1, 0)), Vector((-1, 1)), Vector((0, -1)), Vector((0, 1)), Vector((1, -1)), Vector((1, 0)), Vector((1, 1))]
 
@@ -202,8 +203,6 @@ class King():
                 self.directions.append(Vector((i, j)))
         self.directions.remove(Vector((0, 0))
         """
-    def __repr__(self):
-        return f"{self.name}"
 
     def generate_moves(self, board_obj, position):
         board = board_obj.board
@@ -214,7 +213,7 @@ class King():
             changing += direction
             if 0 <= changing[0] <= 7 and 0 <= changing[1] <= 7:
                 rank, file = changing[0], changing[1]
-                if isinstance(board[rank][file], No_Piece):
+                if type(board[rank][file]) == No_Piece:
                     moves.append((rank, file))
                     changing += direction
                     continue
