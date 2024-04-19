@@ -6,9 +6,6 @@ from squares import *
 
 class Board():
     #Rank = line, file = column
-    conversion = dict(zip("abcdefgh", [0, 1, 2, 3, 4, 5, 6, 7]))
-    invert = {values: keys for keys, values in conversion.items()}
-
     def __init__(self, board=None, info=None, king_pos=None, fen_str=None):
 
         self.board = board
@@ -73,10 +70,8 @@ class Board():
             temp, king_pos = _move(self.board_copy(), o_rank, o_file, t_rank, t_file)
             temp_board = Board(board=temp, king_pos=king_pos)
         else:
-            raise ValueError()
             return False
         if temp_board.isChecked(piece.colour, black if piece.colour else white):
-            raise ValueError()
             return False
 
         self.info["side"] = BLACK if self.info["side"] else WHITE
@@ -184,18 +179,6 @@ class Board():
             return True
         return False
 
-    def game_over(self):
-        king_pos = self.get_king_position()
-        attacked = self.attacked_squares()
-        isChecked = self.check(king_pos, attacked)
-        if isChecked is not None:
-            if not self.board[king_pos[0]][king_pos[1]].generate_moves(self, position):
-                return Game.get_opponent(isChecked)
-        if not self.get_legal_moves():
-            return 2        #stalemate
-        if self.info["halfmove"] >= 100:        #and side to move has at least one legal move
-            return 3    #50-move draw
-        return False
 
 
 if __name__ == "__main__":
