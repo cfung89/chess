@@ -29,9 +29,7 @@ class Board():
         return string
     
     def get_info(self):
-        fen_info = self.info.copy()
-        fen_info.pop("king_position")
-        return fen_info
+        return self.info.copy()
 
     def get_king_position(self):
         return self.king_pos
