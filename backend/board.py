@@ -117,7 +117,7 @@ class Board():
                     copy_board[t_rank][o_rook_pos] = No_Piece()
             return copy_board, king_pos
 
-        white, black, w_boards, b_boards = dict(), dict(), dict(), dict()
+        white, black, w_boards, b_boards, non_attacking, na_boards = dict(), dict(), dict(), dict(), dict(), dict()
         for rank in range(len(self.board)):
             for file in range(len(self.board[rank])):
                 piece = self.board[rank][file]
@@ -128,6 +128,8 @@ class Board():
                         white[position] = possible_moves
                     else:
                         black[position] = possible_moves
+                    if type(piece) == Pawn:
+                        non_attacking_moves = piece.
         white, black = self.castling(white, black)
         for colour in self.get_king_position():
             legal_moves = white if colour else black
