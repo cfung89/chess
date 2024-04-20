@@ -54,8 +54,6 @@ class Board():
             ind = black[original].index(new)
             self.board = b_boards[original][ind]
 
-        o_rank, o_file = original
-        t_rank, t_file = new
         self.info["side"] = BLACK if self.info["side"] else WHITE
         if type(piece) == Pawn:
             if t_rank - o_rank == 2:
@@ -117,19 +115,26 @@ class Board():
                     copy_board[t_rank][o_rook_pos] = No_Piece()
             return copy_board, king_pos
 
-        white, black, w_boards, b_boards, non_attacking, na_boards = dict(), dict(), dict(), dict(), dict(), dict()
+        white, black, w_boards, b_boards, w_non_attacking, w_na_boards, b_non_attacking, b_na_boards = dict(), dict(), dict(), dict(), dict(), dict(), dict(), dict()
         for rank in range(len(self.board)):
             for file in range(len(self.board[rank])):
                 piece = self.board[rank][file]
                 if type(piece) != No_Piece:
                     position = (rank, file)
                     possible_moves = piece.generate_moves(self, position)
-                    if piece.colour:
-                        white[position] = possible_moves
-                    else:
-                        black[position] = possible_moves
                     if type(piece) == Pawn:
-                        non_attacking_moves = piece.
+                        possible_moves, non_attacking_moves = possible_moves
+                        if piece.colour:
+                            white[position] = [possible_moves] if type(possible_moves) != list else possible_moves
+                            w_non_attacking[position] = non_attacking_moves if type(non_attacking_moves) != list else non_attacking_moves
+                        else:
+                            black[position] = [possible_moves] if type(possible_moves) != list else possible_moves
+                            b_non_attacking[position] = non_attacking_moves if type(non_attacking_moves) != list else non_attacking_moves
+                    else:
+                        if piece.colour:
+                            white[position] = [possible_moves] if type(possible_moves) != list else possible_moves
+                        else:
+                            black[position] = [possible_moves] if type(possible_moves) != list else possible_moves
         white, black = self.castling(white, black)
         for colour in self.get_king_position():
             legal_moves = white if colour else black
@@ -156,23 +161,48 @@ class Board():
                             b_boards[o_pos] = [temp_board.board]
                         else:
                             b_boards[o_pos].append(temp_board.board)
-                legal_moves[o_pos] = [i for i in legal_moves[o_pos] if i != "-"]
+                if colour:
+                    white[o_pos] = [i for i in legal_moves[o_pos] if i != "-"]
+                else:
+                    black[o_pos] = [i for i in legal_moves[o_pos] if i != "-"]
 
-            """
-            pos = self.get_king_position()[colour]
-            king_moves = set(legal_moves.pop(pos))
-            temp = set(Board.get_moves(opponent_moves))
-            king_moves = list(king_moves - temp)
-            legal_moves[pos] = king_moves
-            """
+            na_legal_moves = w_non_attacking if colour else b_non_attacking
+            na_opp_moves = b_non_attacking if colour else w_non_attacking
+            for o_pos in na_legal_moves:
+                for ind in range(len(na_legal_moves[o_pos])):
+                    move = na_legal_moves[o_pos][ind]
+                    temp_board, king_pos = _move(self.board_copy(), o_pos, move, king_pos)
+                    temp_board = Board(board=temp_board, king_pos=king_pos)
+                    temp_opp = deepcopy(na_opp_moves)
+                    if type(temp_board.board[move[0]][move[1]]) != No_Piece:
+                        temp_opp[move] = []
+                    if temp_board.isChecked(king_pos, colour, temp_opp):
+                        na_legal_moves[o_pos][ind] = "-"
+                    elif colour:
+                        if o_pos not in w_na_boards:
+                            w_na_boards[o_pos] = [temp_board.board]
+                        else:
+                            w_na_boards[o_pos].append(temp_board.board)
+                    else:
+                        if o_pos not in b_na_boards:
+                            b_na_boards[o_pos] = [temp_board.board]
+                        else:
+                            b_na_boards[o_pos].append(temp_board.board)
+                if colour:
+                    w_non_attacking[o_pos] = [i for i in na_legal_moves[o_pos] if i != "-"]
+                    white[o_pos].extend(w_non_attacking[o_pos])
+                    if o_pos in w_boards and o_pos in w_na_boards:
+                        w_boards[o_pos].extend(w_na_boards[o_pos])
+                    elif o_pos not in w_boards and o_pos in w_na_boards:
+                        w_boards[o_pos] = w_na_boards[o_pos]
+                else:
+                    b_non_attacking[o_pos] = [i for i in na_legal_moves[o_pos] if i != "-"]
+                    black[o_pos].extend(b_non_attacking[o_pos])
+                    if o_pos in b_boards and o_pos in b_na_boards:
+                        b_boards[o_pos].extend(b_na_boards[o_pos])
+                    elif o_pos not in b_boards and o_pos in b_na_boards:
+                        b_boards[o_pos] = b_na_boards[o_pos]
         return white, black, w_boards, b_boards
-
-    @staticmethod
-    def get_moves(legal_moves):
-        temp = list()
-        for loop in legal_moves.values():
-            temp.extend(loop)
-        return temp
 
     def castling(self, white, black):
         board = self.board
@@ -201,7 +231,9 @@ class Board():
 
     def isChecked(self, king, colour, opp_moves):
         #king = self.get_king_position()[colour]
-        attacked = Board.get_moves(opp_moves)
+        attacked = list()
+        for loop in opp_moves.values():
+            attacked.extend(loop)
         if king in attacked:
             return True
         return False

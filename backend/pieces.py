@@ -68,10 +68,10 @@ class Pawn(Piece):
     def __init__(self, colour):
         super().__init__(colour)
         self.name = "P" if colour else "p"
-        self.not_moved = 1
 
     def generate_moves(self, board_obj, position):
         moves = list()
+        na_moves = list()
         board = board_obj.board
         en_passant = board_obj.info["en_passant"]
         rank, file = position[0], position[1]
@@ -80,7 +80,7 @@ class Pawn(Piece):
             for forward in range(2 if position[0]==6 else 1):
                 rank -= 1
                 if rank >= 0 and type(board[rank][file]) == No_Piece:
-                    moves.append((rank, file))
+                    na_moves.append((rank, file))
                 else:
                     break
 
@@ -104,7 +104,7 @@ class Pawn(Piece):
             for forward in range(2 if position[0]==1 else 1):
                 rank += 1
                 if rank <= 7 and type(board[rank][file]) == No_Piece:
-                    moves.append((rank, file))
+                    na_moves.append((rank, file))
                 else:
                     break
 
@@ -123,7 +123,8 @@ class Pawn(Piece):
                         moves.append((position[0]+1, position[1]+1))
                     elif position[1] == pawn[1]+1:
                         moves.append((position[0]+1, position[1]-1))
-        return moves
+        return moves, na_moves
+
 
 class Rook(Piece):
     def __init__(self, colour):
