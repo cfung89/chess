@@ -32,7 +32,6 @@ def new_game():
 @app.route('/move', methods=['POST'])
 def board_move():
     resp = request.get_json()
-    print([i for i in gamelog.find()])
     last = gamelog.find().sort({"_id":-1}).limit(1)
     fen = [entry for entry in last][0]["fen"]
     game = Game(fen)
