@@ -68,6 +68,7 @@ class Pawn(Piece):
     def __init__(self, colour):
         super().__init__(colour)
         self.name = "P" if colour else "p"
+        self.value = 100
 
     def generate_moves(self, board_obj, position):
         moves = list()
@@ -131,6 +132,7 @@ class Rook(Piece):
         super().__init__(colour)
         self.name = "R" if colour else "r"
         self.directions = [Vector((-1, 0)), Vector((1, 0)), Vector((0, -1)), Vector((0, 1))]
+        self.value = 500
 
         """
         self.directions = list()
@@ -146,6 +148,7 @@ class Knight(Piece):
         super().__init__(colour)
         self.name = "N" if colour else "n"
         self.directions = [Vector((-1, -2)), Vector((-1, 2)), Vector((1, -2)), Vector((1, 2)), Vector((-2, -1)), Vector((-2, 1)), Vector((2, -1)), Vector((2, 1))]
+        self.value = 320
 
         """
         self.directions = list()
@@ -177,6 +180,8 @@ class Bishop(Piece):
         super().__init__(colour)
         self.name = "B" if colour else "b"
         self.directions = [Vector((-1, -1)), Vector((-1, 1)), Vector((1, -1)), Vector((1, 1))]
+        self.value = 330
+
         """
         self.directions = list()
         for i in (-1, 1):
@@ -190,12 +195,14 @@ class Queen(Piece):
         self.name = "Q" if colour else "q"
         a, b = Rook(WHITE), Bishop(WHITE)
         self.directions = a.directions + b.directions
+        self.value = 900
 
 class King(Piece):
     def __init__(self, colour):
         super().__init__(colour)
         self.name = "K" if colour else "k"
         self.directions = [Vector((-1, -1)), Vector((-1, 0)), Vector((-1, 1)), Vector((0, -1)), Vector((0, 1)), Vector((1, -1)), Vector((1, 0)), Vector((1, 1))]
+        self.value = 20000
 
         """
         self.directions = list()
