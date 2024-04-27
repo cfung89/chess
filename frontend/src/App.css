@@ -4,3 +4,11 @@
 	height: 100vh;
 	background-color: #202020;
 }
+
+.app {
+	color: darkgreen;
+}
+
+.app username {
+	background-color: aqua;
+}

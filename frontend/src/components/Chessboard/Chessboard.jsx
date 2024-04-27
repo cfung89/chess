@@ -32,7 +32,11 @@ initialBoardState.push({image: "assets/bk.png", x: 4, y: 7})
 initialBoardState.push({image: "assets/wQ.png", x: 3, y: 0})
 initialBoardState.push({image: "assets/wK.png", x: 4, y: 0})
 
-export default function Chessboard() {
+document.addEventListener("contextmenu", (e) => {
+	e.preventDefault();
+});
+
+export default function Chessboard({fen}) {
 	const [activePiece, setActivePiece] = useState(null);
 	const [gridX, setGridX] = useState(0);
 	const [gridY, setGridY] = useState(0);
@@ -125,6 +129,7 @@ export default function Chessboard() {
 				onMouseMove={e => movePiece(e)} 
 				onMouseDown={e => grabPiece(e)} 
 				onMouseUp={e => dropPiece(e)}
+				//onContextMenu={e => console.log("right-click")}
 				ref={chessboardRef}
 				id="chessboard"
 			>
