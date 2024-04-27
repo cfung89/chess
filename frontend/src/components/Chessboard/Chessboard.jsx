@@ -1,52 +1,58 @@
-import React, {useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import Tile from '../Tile/Tile';
 import './Chessboard.css';
 
 const pieces = [];
 
-for(let i = 0; i < 8; i++) {
-	pieces.push({image: "assets/bp.png", x: i, y: 6})
-	pieces.push({image: "assets/wP.png", x: i, y: 1})
-}
-pieces.push({image: "assets/br.png", x: 0, y: 7})
-pieces.push({image: "assets/br.png", x: 7, y: 7})
-pieces.push({image: "assets/wR.png", x: 0, y: 0})
-pieces.push({image: "assets/wR.png", x: 7, y: 0})
-
-pieces.push({image: "assets/bn.png", x: 1, y: 7})
-pieces.push({image: "assets/bn.png", x: 6, y: 7})
-pieces.push({image: "assets/wN.png", x: 1, y: 0})
-pieces.push({image: "assets/wN.png", x: 6, y: 0})
-
-pieces.push({image: "assets/bb.png", x: 2, y: 7})
-pieces.push({image: "assets/bb.png", x: 5, y: 7})
-pieces.push({image: "assets/wB.png", x: 2, y: 0})
-pieces.push({image: "assets/wB.png", x: 5, y: 0})
-
-pieces.push({image: "assets/bq.png", x: 3, y: 7})
-pieces.push({image: "assets/bk.png", x: 4, y: 7})
-pieces.push({image: "assets/wQ.png", x: 3, y: 0})
-pieces.push({image: "assets/wK.png", x: 4, y: 0})
-
 const ranks = ["1", "2", "3", "4", "5", "6", "7", "8"];
 const files = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
-let activePiece = null;
+const initialBoardState = [];
+for(let i = 0; i < 8; i++) {
+	initialBoardState.push({image: "assets/bp.png", x: i, y: 6})
+	initialBoardState.push({image: "assets/wP.png", x: i, y: 1})
+}
+initialBoardState.push({image: "assets/br.png", x: 0, y: 7})
+initialBoardState.push({image: "assets/br.png", x: 7, y: 7})
+initialBoardState.push({image: "assets/wR.png", x: 0, y: 0})
+initialBoardState.push({image: "assets/wR.png", x: 7, y: 0})
 
+initialBoardState.push({image: "assets/bn.png", x: 1, y: 7})
+initialBoardState.push({image: "assets/bn.png", x: 6, y: 7})
+initialBoardState.push({image: "assets/wN.png", x: 1, y: 0})
+initialBoardState.push({image: "assets/wN.png", x: 6, y: 0})
+
+initialBoardState.push({image: "assets/bb.png", x: 2, y: 7})
+initialBoardState.push({image: "assets/bb.png", x: 5, y: 7})
+initialBoardState.push({image: "assets/wB.png", x: 2, y: 0})
+initialBoardState.push({image: "assets/wB.png", x: 5, y: 0})
+
+initialBoardState.push({image: "assets/bq.png", x: 3, y: 7})
+initialBoardState.push({image: "assets/bk.png", x: 4, y: 7})
+initialBoardState.push({image: "assets/wQ.png", x: 3, y: 0})
+initialBoardState.push({image: "assets/wK.png", x: 4, y: 0})
 
 export default function Chessboard() {
+	const [activePiece, setActivePiece] = useState(null);
+	const [gridX, setGridX] = useState(0);
+	const [gridY, setGridY] = useState(0);
+	const [pieces, setPieces] = useState(initialBoardState);
 	const chessboardRef = useRef(null);
 
 	function grabPiece(e) {
 		const element = e.target;
-		if(element.classList.contains("chess-piece")) {
+		const chessboard = chessboardRef.current;
+		if(element.classList.contains("chess-piece") && chessboard) {
+			setGridX(Math.floor((e.clientX - chessboard.offsetLeft) / 100));
+			setGridY(Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - 800) / 100)));
+
 			const x = e.clientX - 50;
 			const y = e.clientY - 50;
 			element.style.position = "absolute";
 			element.style.left = `${x}px`;
 			element.style.top = `${y}px`;
 
-			activePiece = element;
+			setActivePiece(element);
 		}
 	}
 
@@ -80,8 +86,22 @@ export default function Chessboard() {
 	}
 
 	function dropPiece(e) {
-		if(activePiece){
-			activePiece = null;
+		const chessboard = chessboardRef.current;
+		if(activePiece && chessboard){
+			const x = Math.floor((e.clientX - chessboard.offsetLeft) / 100);
+			const y = Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - 800) / 100));
+
+			setPieces((value) => {
+				const pieces = value.map(p => {
+					if (p.x === gridX && p.y === gridY) {
+						p.x = x;
+						p.y = y;
+					}
+					return p;
+				});
+				return pieces;
+			});
+			setActivePiece(null);
 		}
 	}
 
