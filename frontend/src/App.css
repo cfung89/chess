@@ -3,12 +3,15 @@
 	place-content: center;
 	height: 100vh;
 	background-color: #202020;
+	outline: none;
 }
 
-.app {
-	color: darkgreen;
+.text {
+	color: white;
 }
 
-.app username {
-	background-color: aqua;
+.username {
+	width: 100px;
+	font-family: Georgia, 'Times New Roman', Times, serif;
+	font-size: 20px;
 }
