@@ -21,6 +21,6 @@ export const tileIsOccupiedByOpponent = (position, boardState, team) => {
     }
   }
 
-  export const tileIsEmptyOrOccupiedByOpponent =(position, boardState, team) => {
+  export const tileIsEmptyOrOccupiedByOpponent = (position, boardState, team) => {
     return (!tileIsOccupied(position, boardState) || tileIsOccupiedByOpponent(position, boardState, team));
   }

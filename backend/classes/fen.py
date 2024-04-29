@@ -60,7 +60,7 @@ class Fen_String():
             fen_string += "/"
         fen_string = fen_string[:-1]
         information = list(info.values())
-        fen_string += " w" if WHITE else " b"
+        fen_string += " w" if information[0] else " b"
         for i in information[1:]:
             fen_string += " " + str(i)
         return fen_string

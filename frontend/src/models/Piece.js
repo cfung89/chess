@@ -1,5 +1,4 @@
-import { TeamType, PieceType } from "../Types";
-import { Position } from "./Position";
+import { PieceType } from "../Types";
 
 export class Piece {
     image;
@@ -50,8 +49,6 @@ export class Piece {
     }
 
     clone() {
-        return new Piece(this.position.clone(),
-            this.type, this.team, this.hasMoved,
-            this.possibleMoves?.map(m => m.clone()));
+        return new Piece(this.position.clone(), this.type, this.team, this.hasMoved, this.possibleMoves?.map(m => m.clone()));
     }
 }

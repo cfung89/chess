@@ -4,6 +4,10 @@ import Tile from "../Tile/Tile";
 import {VERTICAL_AXIS, HORIZONTAL_AXIS, GRID_SIZE,} from "../../Constants";
 import { Piece, Position } from "../../models";
 
+document.addEventListener("contextmenu", (e) => {
+	e.preventDefault();
+});
+
 export default function Chessboard({playMove, pieces}) {
   const [activePiece, setActivePiece] = useState(null);
   const [grabPosition, setGrabPosition] = useState(new Position(-1, -1));
@@ -75,9 +79,9 @@ export default function Chessboard({playMove, pieces}) {
       const currentPiece = pieces.find((p) => p.samePosition(grabPosition));
 
       if (currentPiece) {
-        var succes = playMove(currentPiece.clone(), new Position(x, y));
+        var success = playMove(currentPiece.clone(), new Position(x, y));
 
-        if(!succes) {
+        if(!success) {
           //Resets the piece position
           activePiece.style.position = "relative";
           activePiece.style.removeProperty("top");

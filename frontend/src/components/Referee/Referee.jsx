@@ -1,11 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { initialBoard } from "../../Constants";
 import { Piece, Position } from "../../models";
-import { Board } from "../../models/Board";
-import { Pawn } from "../../models/Pawn";
-import { bishopMove, getPossibleBishopMoves, getPossibleKingMoves, getPossibleKnightMoves, getPossiblePawnMoves, getPossibleQueenMoves, getPossibleRookMoves, kingMove, knightMove, pawnMove, queenMove, rookMove } from "../../referee/rules";
 import { PieceType, TeamType } from "../../Types";
 import Chessboard from "../Chessboard/Chessboard";
+import postMove from "../../server/Post";
+import getMoves from "../../server/GetMoves";
+import start from "../../server/Start";
+import botMove from "../../server/BotMove";
+import { HORIZONTAL_AXIS } from "../../Constants";
 
 export default function Referee() {
     const [board, setBoard] = useState(initialBoard.clone());
@@ -13,14 +15,17 @@ export default function Referee() {
     const modalRef = useRef(null);
     const checkmateModalRef = useRef(null);
 
-    function playMove(playedPiece, destination) {
+    function playMove(playedPiece, destination, bot=false) {
         // If the playing piece doesn't have any moves return
         if (playedPiece.possibleMoves === undefined) return false;
 
         // Prevent the inactive team from playing
         if (playedPiece.team === TeamType.OUR && board.totalTurns % 2 !== 1) return false;
         if (playedPiece.team === TeamType.OPPONENT && board.totalTurns % 2 !== 0) return false;
-
+        // Bot move
+        if (!bot) {
+            if (playedPiece.team === TeamType.OPPONENT && board.totalTurns % 2 !== 1) return false;
+        }
         let playedMoveIsValid = false;
 
         const validMove = playedPiece.possibleMoves?.some(m => m.samePosition(destination));
@@ -61,6 +66,7 @@ export default function Referee() {
             });
         }
 
+        postMove(playedPiece.position, destination);
         return playedMoveIsValid;
     }
 
@@ -69,13 +75,7 @@ export default function Referee() {
 
         if (type === PieceType.PAWN) {
             if ((desiredPosition.x - initialPosition.x === -1 || desiredPosition.x - initialPosition.x === 1) && desiredPosition.y - initialPosition.y === pawnDirection) {
-                const piece = board.pieces.find(
-                    (p) =>
-                        p.position.x === desiredPosition.x &&
-                        p.position.y === desiredPosition.y - pawnDirection &&
-                        p.isPawn &&
-                        p.enPassant
-                );
+                const piece = board.pieces.find((p) => p.position.x === desiredPosition.x && p.position.y === desiredPosition.y - pawnDirection && p.isPawn && p.enPassant);
                 if (piece) {
                     return true;
                 }
@@ -83,33 +83,6 @@ export default function Referee() {
         }
 
         return false;
-    }
-
-    //TODO
-    //Add stalemate!
-    function isValidMove(initialPosition, desiredPosition, type, team) {
-        let validMove = false;
-        switch (type) {
-            case PieceType.PAWN:
-                validMove = pawnMove(initialPosition, desiredPosition, team, board.pieces);
-                break;
-            case PieceType.KNIGHT:
-                validMove = knightMove(initialPosition, desiredPosition, team, board.pieces);
-                break;
-            case PieceType.BISHOP:
-                validMove = bishopMove(initialPosition, desiredPosition, team, board.pieces);
-                break;
-            case PieceType.ROOK:
-                validMove = rookMove(initialPosition, desiredPosition, team, board.pieces);
-                break;
-            case PieceType.QUEEN:
-                validMove = queenMove(initialPosition, desiredPosition, team, board.pieces);
-                break;
-            case PieceType.KING:
-                validMove = kingMove(initialPosition, desiredPosition, team, board.pieces);
-        }
-
-        return validMove;
     }
 
     function promotePawn(pieceType) {
@@ -144,11 +117,27 @@ export default function Referee() {
     function restartGame() {
         checkmateModalRef.current?.classList.add("hidden");
         setBoard(initialBoard.clone());
+        start();
     }
 
+    if (board.totalTurns % 2 !== 1) {
+        const o = board.pieces;
+        const move = botMove();
+        move.then((value) => {
+            const origPos = new Position(HORIZONTAL_AXIS.indexOf(value.move[0]), parseInt(value.move[1])-1);
+            const newPos = new Position(HORIZONTAL_AXIS.indexOf(value.move[2]), parseInt(value.move[3])-1);
+            const currentPiece = board.pieces.find((p) => p.samePosition(origPos));
+            if (currentPiece) {
+                const success = playMove(currentPiece.clone(), newPos, true);
+            }
+        });
+    }
+
+    //console.log(board)
     return (
         <>
-            <p style={{ color: "white", fontSize: "24px", textAlign: "center" }}>Total turns: {board.totalTurns}</p>
+            <p style={{ color: "white", fontSize: "20px", textAlign: "center" }}>Total turns: {board.totalTurns}</p>
+            <p style={{color: "white", fontSize: "16px", textAlign: "left"}}>Player 2</p>
             <div className="modal hidden" ref={modalRef}>
                 <div className="modal-body">
                 <img onClick={() => promotePawn(PieceType.ROOK)} src={`/assets/images/rook_${promotionTeamType()}.png`} />
@@ -165,8 +154,8 @@ export default function Referee() {
                     </div>
                 </div>
             </div>
-            <Chessboard playMove={playMove}
-                pieces={board.pieces} />
+            <Chessboard playMove={playMove} pieces={board.pieces} />
+            <p style={{color: "white", fontSize: "16px", textAlign: "left"}}>Player 1</p>
         </>
     )
 }

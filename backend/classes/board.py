@@ -90,6 +90,9 @@ class Board():
         if piece.colour == BLACK:
             self.info["fullmove"] += 1
 
+    def get_attacking_moves(self):
+        pass
+
     def get_legal_moves(self):
         def _move(copy_board, original, new, king_pos):
             o_rank, o_file = original

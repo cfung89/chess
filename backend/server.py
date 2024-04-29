@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
+import time
 import sys
 sys.path.insert(1, './classes')
 
@@ -20,11 +21,12 @@ db.drop_collection('gamelog')
 
 @app.route('/create', methods=['POST'])
 def new_game():
+    db.drop_collection('gamelog')
     resp = request.get_json()
     game = Game(resp['fen'])
 
-    new_fen, info, response = game.game_info()
-    gamelog.insert_one({"fen": new_fen, "info": info})
+    new_fen, info, legal_moves, response = game.game_info()
+    gamelog.insert_one({"fen": new_fen, "info": info, "moves": legal_moves})
     response['result'] = game.game_over([b for b in gamelog.find({"info": info})])
     response = jsonify(response)
     return response, 200
@@ -37,14 +39,38 @@ def board_move():
     game = Game(fen)
     game.move(resp['move'])
 
-    new_fen, info, response = game.game_info()
+    new_fen, info, legal_moves, response = game.game_info()
 
-    gamelog.insert_one({"fen": new_fen, "info": info})
+    gamelog.insert_one({"fen": new_fen, "info": info, "moves": legal_moves})
     response['result'] = game.game_over([b for b in gamelog.find({"info": info})])
     if response["result"]:
         db.drop_collection('gamelog')
     response = jsonify(response)
     return response, 200
+
+@app.route('/botmove', methods=['GET'])
+def bot_move():
+    time.sleep(0.1)
+    last = gamelog.find().sort({"_id":-1}).limit(1)
+    fen = [entry for entry in last][0]["fen"]
+    game = Game(fen)
+    move = {"move": game.bot()}
+    return jsonify(move), 200
+
+@app.route('/legalmoves', methods=['GET'])
+def piece_move():
+    #resp = request.get_json()
+    #position = (resp["x"], resp["y"])
+    try:
+        last = gamelog.find().sort({"_id":-1}).limit(1)
+        legal_moves = [entry for entry in last][0]["moves"]
+    except IndexError:
+        game = Game("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+        king, turn, colours = game.update_moves()
+        legal_moves = colours[0]|colours[1]
+        legal_moves = {str(pos): legal_moves[pos] for pos in legal_moves}
+    return jsonify(legal_moves), 200
+
 
 @app.route('/resign', methods=['POST'])
 def resign():

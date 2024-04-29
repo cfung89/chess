@@ -18,10 +18,10 @@ class Bot():
         while not moves[chosen_pos]:
             chosen_pos = o_pos[randint(0, len(o_pos)-1)]
         chosen_move = moves[chosen_pos][randint(0, len(moves[chosen_pos])-1)]
-        print(Square.index_to_tile(chosen_pos) + Square.index_to_tile(chosen_move))
         return Square.index_to_tile(chosen_pos) + Square.index_to_tile(chosen_move)
 
-    def evaluate(self, board, moves)
+    def evaluate(self, board, moves):
+        pass
 
     def evaluate_endgame(self):
         pass

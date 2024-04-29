@@ -2,6 +2,7 @@
 
 from board import *
 from pieces import *
+from bot import *
 
 WHITE = 1
 BLACK = 0
@@ -32,7 +33,14 @@ class Game():
         return 1
 
     def move(self, move):
+        print(move)
         self.board.move(move)
+    
+    def bot(self):
+        bot = Bot(0)
+        move = bot.evaluate_middlegame(self.board, self.legal_moves)
+        return move
+
 
     def game_over(self, repetition):
         if len(repetition) >= 3:
@@ -64,4 +72,4 @@ class Game():
 
         legal_moves = {str(pos): self.legal_moves[pos] for pos in self.legal_moves}
         response = {'board': fen_board, 'legal_moves': legal_moves}
-        return new_fen, [fen_board, player, castling, en_passant], response
+        return new_fen, [fen_board, player, castling, en_passant], legal_moves, response

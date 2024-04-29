@@ -3,6 +3,10 @@ import { PieceType, TeamType } from "../Types";
 import { Pawn } from "./Pawn";
 import { Piece } from "./Piece";
 import { Position } from "./Position";
+import getMoves from "../server/GetMoves";
+import start from "../server/Start";
+
+start();
 
 export class Board {
     pieces;
@@ -19,9 +23,33 @@ export class Board {
     }
 
     calculateAllMoves() {
-        // Calculate the moves of all the pieces
+        //const moves = getMoves();
         for (const piece of this.pieces) {
-            piece.possibleMoves = this.getValidMoves(piece, this.pieces)
+            /*
+            const calculatedMoves = [];
+            moves.then((value) => {
+                console.log(value);
+                for (let key in value) {
+                    const origX = parseInt(key[1]);
+                    const origY = parseInt(key[4]);
+                    console.log(origX, origY);
+                    if (piece.position.x === origX && piece.position.y === origY) {
+                        console.log(origX, origY);
+                        for (let i = 0; i < value[key].length; i++) {
+                            const arr = value[key][i];
+                            const newPos = new Position(arr[0], arr[1]);
+                            calculatedMoves.push(newPos);
+                            //console.log(calculatedMoves);
+                        }
+                    }
+                    //console.log(key[1], key[4]);
+                    //console.log(value[key]);
+                    //console.log(value[key][0], value[key][1]);
+                }
+            });
+            //piece.possibleMoves = this.calculatedMoves;
+            */
+            piece.possibleMoves = this.getValidMoves(piece, this.pieces);
         }
 
         // Calculate castling moves
@@ -29,6 +57,7 @@ export class Board {
             if (king.possibleMoves === undefined) continue;
 
             king.possibleMoves = [...king.possibleMoves, ...getCastlingMoves(king, this.pieces)];
+            //console.log(king.possibleMoves);
         }
 
         // Check if the current team moves are valid
@@ -106,10 +135,7 @@ export class Board {
         }
     }
 
-    playMove(enPassantMove,
-        validMove,
-        playedPiece,
-        destination) {
+    playMove(enPassantMove, validMove, playedPiece, destination) {
         const pawnDirection = playedPiece.team === TeamType.OUR ? 1 : -1;
         const destinationPiece = this.pieces.find(p => p.samePosition(destination));
 
