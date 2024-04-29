@@ -12,7 +12,7 @@ class Bot():
     def evaluate_opening(self, fen):
         pass
 
-    def evaluate_middlegame(self, board, moves):
+    def evaluate_game(self, board, moves):
         o_pos = list(moves.keys())
         chosen_pos = o_pos[randint(0, len(o_pos)-1)]
         while not moves[chosen_pos]:
@@ -21,9 +21,6 @@ class Bot():
         return Square.index_to_tile(chosen_pos) + Square.index_to_tile(chosen_move)
 
     def evaluate(self, board, moves):
-        pass
-
-    def evaluate_endgame(self):
         pass
 
 if __name__ == "__main__":

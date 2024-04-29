@@ -38,7 +38,7 @@ class Game():
     
     def bot(self):
         bot = Bot(0)
-        move = bot.evaluate_middlegame(self.board, self.legal_moves)
+        move = bot.evaluate_game(self.board, self.legal_moves)
         return move
 
 
