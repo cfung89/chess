@@ -33,7 +33,6 @@ class Game():
         return 1
 
     def move(self, move):
-        print(move)
         self.board.move(move)
     
     def bot(self):
