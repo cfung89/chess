@@ -37,8 +37,7 @@ class Game():
         self.board.move(move)
     
     def bot(self):
-        bot = Bot(0)
-        move = bot.evaluate_game(self.board, self.legal_moves)
+        move = evaluate_random(self.board, self.legal_moves)
         return move
 
 

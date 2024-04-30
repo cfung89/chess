@@ -239,6 +239,17 @@ class Board():
             return True
         return False
 
+    def evaluate_board(self):
+        eval_w, eval_b = 0, 0
+        for rank in range(len(self.board)):
+            for file in range(len(self.board)):
+                piece = self.board[rank][file]
+                if type(piece) != No_Piece:
+                    if piece.colour:
+                        eval_w += piece.value + piece.piece_square[rank][file]
+                    else:
+                        eval_b += piece.value + piece.piece_square[rank][file]
+        return eval_w, eval_b
 
 
 if __name__ == "__main__":
