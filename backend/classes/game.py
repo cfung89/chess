@@ -13,10 +13,8 @@ class Game():
         self.update_moves()
 
     def update_moves(self):
-        white, black, w_boards, b_boards = self.board.get_legal_moves()
         turn = self.board.get_info()["side"]
-        colours = {WHITE: white, BLACK: black}
-        self.legal_moves = colours[turn]
+        self.legal_moves = self.board.legal_moves[turn]
         king = self.board.get_king_position()[turn]
         return king, turn, colours
 

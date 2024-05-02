@@ -75,11 +75,9 @@ class Pawn(Piece):
         else:
             self.piece_square = [[0, 0, 0, 0, 0, 0, 0, 0], [5, 10, 10, -20, -20, 10, 10, 5], [5, -5, -10, 0, 0, -10, -5, 5], [0, 0, 0, 20, 20, 0, 0, 0], [5, 5, 10, 25, 25, 10, 5, 5], [10, 10, 20, 30, 30, 20, 10, 10], [50, 50, 50, 50, 50, 50, 50, 50], [0, 0, 0, 0, 0, 0, 0, 0]]
 
-    def generate_moves(self, board_obj, position):
-        moves = list()
+    def non_attacking_moves(self, board_obj, position):
         na_moves = list()
         board = board_obj.board
-        en_passant = board_obj.info["en_passant"]
         rank, file = position[0], position[1]
         if self.colour:
             #Check for push
@@ -89,7 +87,22 @@ class Pawn(Piece):
                     na_moves.append((rank, file))
                 else:
                     break
+        else:
+            #Check for push
+            for forward in range(2 if position[0]==1 else 1):
+                rank += 1
+                if rank <= 7 and type(board[rank][file]) == No_Piece:
+                    na_moves.append((rank, file))
+                else:
+                    break
+        return na_moves
 
+    def generate_moves(self, board_obj, position):
+        moves = list()
+        board = board_obj.board
+        en_passant = board_obj.info["en_passant"]
+        rank, file = position[0], position[1]
+        if self.colour:
             #Check for capture
             rank = position[0]-1
             if rank >= 0 and file-1 >= 0 and type(board[rank][file-1]) != No_Piece and board[rank][file-1].colour != self.colour:
@@ -106,13 +119,6 @@ class Pawn(Piece):
                     elif position[1] == pawn[1]+1:
                         moves.append((position[0]-1, position[1]-1))
         else:
-            #Check for push
-            for forward in range(2 if position[0]==1 else 1):
-                rank += 1
-                if rank <= 7 and type(board[rank][file]) == No_Piece:
-                    na_moves.append((rank, file))
-                else:
-                    break
 
             #Check for capture
             rank = position[0]+1
@@ -129,7 +135,7 @@ class Pawn(Piece):
                         moves.append((position[0]+1, position[1]+1))
                     elif position[1] == pawn[1]+1:
                         moves.append((position[0]+1, position[1]-1))
-        return moves, na_moves
+        return moves
 
 
 class Rook(Piece):
