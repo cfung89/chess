@@ -136,7 +136,6 @@ export default function Referee() {
     //console.log(board)
     return (
         <>
-            <p style={{ color: "white", fontSize: "20px", textAlign: "center" }}>Total turns: {board.totalTurns}</p>
             <p style={{color: "white", fontSize: "16px", textAlign: "left"}}>Player 2</p>
             <div className="modal hidden" ref={modalRef}>
                 <div className="modal-body">
