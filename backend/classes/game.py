@@ -4,57 +4,43 @@ from board import *
 from pieces import *
 from bot import *
 
-WHITE = 1
-BLACK = 0
-
 class Game():
     def __init__(self, fen):
         self.board = Board(fen_str=fen)
-        self.update_moves()
-
-    def update_moves(self):
-        turn = self.board.get_info()["side"]
-        self.legal_moves = self.board.legal_moves[turn]
-        king = self.board.get_king_position()[turn]
-        return king, turn, colours
-
-    def get_moves(self):
-        moves = list()
-        for loop in self.legal_moves.values():
-            moves.extend(loop)
-        return moves
-
-    @staticmethod
-    def get_opponent(colour):
-        if colour:
-            return 0
-        return 1
+        self.turn = self.board.get_info()["side"]
+        self.legal_moves = self.board.get_legal_moves(self.turn)
 
     def move(self, move):
         self.board.move(move)
     
     def bot(self):
-        move = evaluate_random(self.board, self.legal_moves)
+        #move = evaluate_random(self.legal_moves)
+        move = evaluate_game(self.board, 2, -float('inf'), float('inf'), True, self.turn)
         return move
 
 
     def game_over(self, repetition):
         if len(repetition) >= 3:
+            print("repetition")
             return 4        #draw by repetition
         
-        king, turn, colours = self.update_moves()
-        moves = self.get_moves()
+        king = self.board.get_king_position()[self.turn]
 
-        if self.board.isChecked(king, colours, colours[Game.get_opponent(turn)]):
-            if moves:       #change the condition
-                return 0        #Only check
-            else:
+        if self.board.isChecked(king, self.board.get_attacking_moves(0 if self.turn else 1)):
+            if not self.legal_moves:       #change the condition
+                print("checkmate")
                 return 1        #checkmate
-        elif not moves:
+            else:
+                print("check")
+                return 0
+        elif not self.legal_moves:
+            print("stalemate")
             return 2        #stalemate
 
         if self.board.info["halfmove"] >= 100:        #and side to move has at least one legal move
+            print("draw")
             return 3    #50-move draw
+        print("nothing")
         return 0
 
     def game_info(self):
@@ -66,6 +52,5 @@ class Game():
         castling = info['castling']
         en_passant = info['en_passant']
 
-        legal_moves = {str(pos): self.legal_moves[pos] for pos in self.legal_moves}
-        response = {'board': fen_board, 'legal_moves': legal_moves}
-        return new_fen, [fen_board, player, castling, en_passant], legal_moves, response
+        response = {'board': fen_board, 'legal_moves': self.legal_moves}
+        return new_fen, [fen_board, player, castling, en_passant], self.legal_moves, response

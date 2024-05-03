@@ -59,7 +59,6 @@ class Piece(object):
                     continue
                 elif board[rank][file].colour != self.colour:
                     moves.append((rank, file))
-                    piece = board[rank + direction[0]][file + direction[1]]
                 break
         return moves
 
@@ -219,8 +218,7 @@ class Queen(Piece):
     def __init__(self, colour):
         super().__init__(colour)
         self.name = "Q" if colour else "q"
-        a, b = Rook(WHITE), Bishop(WHITE)
-        self.directions = a.directions + b.directions
+        self.directions = [Vector((-1, -1)), Vector((-1, 1)), Vector((1, -1)), Vector((1, 1))] + [Vector((-1, 0)), Vector((1, 0)), Vector((0, -1)), Vector((0, 1))]
         self.value = 900
         self.piece_square = list()
         if self.colour:

@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 
 import time
@@ -54,13 +54,22 @@ def bot_move():
     last = gamelog.find().sort({"_id":-1}).limit(1)
     fen = [entry for entry in last][0]["fen"]
     game = Game(fen)
-    move = {"move": game.bot()}
+    botmove = game.bot()
+    if botmove is not None:
+        move = {"move": botmove} 
+    else:
+        db.drop_collection('gamelog')
+        return Response(status=204)
+    new_fen, info, legal_moves, response = game.game_info()
+
+    #gamelog.insert_one({"fen": new_fen, "info": info, "moves": legal_moves})
+    #result = game.game_over([b for b in gamelog.find({"info": info})])
+    #if result:
+    #    db.drop_collection('gamelog')
     return jsonify(move), 200
 
 @app.route('/legalmoves', methods=['GET'])
 def piece_move():
-    #resp = request.get_json()
-    #position = (resp["x"], resp["y"])
     try:
         last = gamelog.find().sort({"_id":-1}).limit(1)
         legal_moves = [entry for entry in last][0]["moves"]

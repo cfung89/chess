@@ -3,25 +3,27 @@
 from game import *
 from squares import *
 from random import randint, choice
+from time import sleep
 
-def evaluate_opening(self, fen):
+def evaluate_opening(fen):
     pass
 
-def evaluate_random(self, board, moves):
-    o_pos = list(moves.keys())
-    chosen_pos = o_pos[randint(0, len(o_pos)-1)]
-    while not moves[chosen_pos]:
-        chosen_pos = o_pos[randint(0, len(o_pos)-1)]
-    chosen_move = moves[chosen_pos][randint(0, len(moves[chosen_pos])-1)]
-    return Square.index_to_tile(chosen_pos) + Square.index_to_tile(chosen_move)
+def evaluate_random(moves):
+    sleep(0.5)
+    try:
+        chosen_move = moves[randint(0, len(moves)-1)]
+    except ValueError:
+        return None
+    return chosen_move
 
 def evaluate_game(board, depth, alpha, beta, max_player, max_colour):
     """Minimax algorithm with alpha-beta pruning"""
+    game = Game(Fen_String.encryptFen(board))
     if depth == 0 or game.game_over():
-        return None, node.eval
+        return None, board.evaluate_board()
 
-    moves = board.get_moves()
-    best_move = random.choice(moves)
+    moves = board.get_legal_moves(max_player)
+    best_move = choice(moves)
 
     if max_player: 
         max_eval = -float('inf')
@@ -59,12 +61,10 @@ if __name__ == "__main__":
     a = Board(fen_str=ex)
     #a.move("d2d4")
     #a.move("e7e6")
-    b = Bot(0)
-    colour = 1
 
     for loop in range(30):
-        white, black, w_boards, b_boards = a.get_legal_moves()
-        new = b.evaluate_middlegame(a, white if colour else black)
+        white, black = a.get_legal_moves()
+        new = evaluate_game(a, white if colour else black)
         a.move(new)
         print(a)
         colour = 0 if colour else 1

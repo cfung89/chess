@@ -13,9 +13,6 @@ class Board():
         self.info = fen.info
         self.king_pos = fen.king_pos
 
-        self.legal_moves = self.get_attacking_moves()
-        self.legal_moves = self.get_legal_moves()
-
     def __repr__(self):
         string = str()
         for rank in self.board:
@@ -101,47 +98,32 @@ class Board():
 
         if piece.colour == BLACK:
             self.info["fullmove"] += 1
-        
-        self.legal_moves = self.get_attacking_moves()
-        self.legal_moves = self.get_legal_moves()
 
-    def get_attacking_moves(self):
-        white, black = [], []
+    def get_attacking_moves(self, colour):
+        moves = []
         for rank in range(len(self.board)):
             for file in range(len(self.board[rank])):
                 piece = self.board[rank][file]
-                if type(piece) != No_Piece:
+                if type(piece) != No_Piece and piece.colour == colour:
                     position = (rank, file)
                     possible_moves = piece.generate_moves(self, position)
                     for move in possible_moves:
-                        if piece.colour:
-                            white.append(Square.index_to_tile(position) + Square.index_to_tile(move))
-                        else:
-                            black.append(Square.index_to_tile(position) + Square.index_to_tile(move))
-        #white, black = self.castling(white, black)
-        self.legal_moves = {WHITE: white, BLACK: black}
-        self.check_inCheck(white, black)
-        self.legal_moves = {WHITE: white, BLACK: black}
-        return white, black
+                        moves.append(Square.index_to_tile(position) + Square.index_to_tile(move))
+        return moves
 
-    def get_legal_moves(self):
-        w_na, b_na = [], []
+    def get_legal_moves(self, colour):
+        moves = self.get_attacking_moves(colour)
         for rank in range(len(self.board)):
             for file in range(len(self.board[rank])):
                 piece = self.board[rank][file]
-                if type(piece) == Pawn:
+                if type(piece) == Pawn and piece.colour == colour:
                     position = (rank, file)
                     possible_moves = piece.non_attacking_moves(self, position)
                     for move in possible_moves:
-                        if piece.colour:
-                            w_na.append(Square.index_to_tile(position) + Square.index_to_tile(move))
-                        else:
-                            b_na.append(Square.index_to_tile(position) + Square.index_to_tile(move))
-        #white, black = self.castling(white, black)
-        self.check_inCheck(w_na, b_na)
-        self.legal_moves[WHITE] += w_na
-        self.legal_moves[BLACK] += b_na
-        return w_na, b_na
+                        moves.append(Square.index_to_tile(position) + Square.index_to_tile(move))
+        print("MOVES", moves)
+        moves = self.validMoves(moves.copy(), colour)
+        return moves
 
     def castling(self, white, black):
         board = self.board
@@ -168,30 +150,22 @@ class Board():
                         black[(king_x, king_y)].append((king_x, rook_y-1 if direction == 1 else rook_y+2))
         return white, black
     
-    def check_inCheck(self, white, black):
-        king = self.get_king_position()
-        for colour in king:
-            legal_moves = white if colour else black
-            opponent_moves = black if colour else white
-            king_pos = king[colour]
+    def validMoves(self, moves, colour):
+        for move in range(len(moves)-1, -1, -1):
+            temp_board = self.board_copy()
+            temp_board.move(moves[move])
+            king_pos = temp_board.get_king_position()[colour]
 
-            for move in range(len(legal_moves)-1, -1, -1):
-                temp_board = self.board_copy()
-                destination = Square.tile_to_index(legal_moves[move][2:])
-                opp_moves = opponent_moves.copy()
-                if type(temp_board.board[destination[0]][destination[1]]) != No_Piece:
-                    for loop in range(len(opp_moves)-1, -1, -1):
-                        if legal_moves[move][2:] == opp_moves[loop][2:]:
-                            opp_moves.remove(opp_moves[loop])
-                temp_board.move(legal_moves[move])
-                if temp_board.isChecked(king_pos, opp_moves):
-                    legal_moves.remove(legal_moves[move])
+            opp_moves = self.get_attacking_moves(0 if colour else 1)
+            if temp_board.isChecked(king_pos, opp_moves):
+                moves.remove(moves[move])
+        return moves
+            
 
     def isChecked(self, king, opp_moves):
-        #king = self.get_king_position()[colour]
         king = Square.index_to_tile(king)
-        attacked = list()
         for move in opp_moves:
+            #print(move[2:])
             if move[2:] == king:
                 return True
         return False
