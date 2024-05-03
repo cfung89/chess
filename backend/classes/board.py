@@ -154,23 +154,25 @@ class Board():
         for move in range(len(moves)-1, -1, -1):
             temp_board = self.board_copy()
             temp_board.move(moves[move])
+            print("KINGPOS", temp_board.get_king_position())
             king_pos = temp_board.get_king_position()[colour]
 
-            opp_moves = self.get_attacking_moves(0 if colour else 1)
+            opp_moves = temp_board.get_attacking_moves(0 if colour else 1)
             if temp_board.isChecked(king_pos, opp_moves):
+                print("removed", moves[move])
                 moves.remove(moves[move])
         return moves
             
 
     def isChecked(self, king, opp_moves):
+        print(self)
         king = Square.index_to_tile(king)
         for move in opp_moves:
-            #print(move[2:])
             if move[2:] == king:
                 return True
         return False
 
-    def evaluate_board(self):
+    def evaluate_board(self, max_player):
         eval_w, eval_b = 0, 0
         for rank in range(len(self.board)):
             for file in range(len(self.board)):
@@ -180,7 +182,8 @@ class Board():
                         eval_w += piece.value + piece.piece_square[rank][file]
                     else:
                         eval_b += piece.value + piece.piece_square[rank][file]
-        return eval_w, eval_b
+        eval = eval_w - eval_b if max_player else eval_b - eval_w
+        return eval
 
 
 if __name__ == "__main__":

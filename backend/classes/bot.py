@@ -1,6 +1,5 @@
 #! /bin/python3
 
-from game import *
 from squares import *
 from random import randint, choice
 from time import sleep
@@ -18,19 +17,18 @@ def evaluate_random(moves):
 
 def evaluate_game(board, depth, alpha, beta, max_player, max_colour):
     """Minimax algorithm with alpha-beta pruning"""
-    game = Game(Fen_String.encryptFen(board))
-    if depth == 0 or game.game_over():
-        return None, board.evaluate_board()
+    moves = board.get_legal_moves(0 if max_player else 1)
+    if depth == 0 or not len(moves):
+        return None, board.evaluate_board(max_player)
 
-    moves = board.get_legal_moves(max_player)
     best_move = choice(moves)
 
     if max_player: 
         max_eval = -float('inf')
         for move in moves:
-            temp_board = board.copy()
+            temp_board = board.board_copy()
             temp_board.move(move)
-            current_eval = evaluate_game(board, depth-1, alpha, beta, False, max_colour)[1]
+            current_eval = evaluate_game(temp_board, depth-1, alpha, beta, False, max_colour)[1]
             if current_eval > max_eval:
                 max_eval = current_eval
                 best_move = move
@@ -41,13 +39,13 @@ def evaluate_game(board, depth, alpha, beta, max_player, max_colour):
     else:
         min_eval = float('inf')
         for move in moves:
-            temp_board = board.copy()
+            temp_board = board.board_copy()
             temp_board.move(move)
-            current_eval = evaluate_game(board, depth-1, alpha, beta, True, max_colour)[1]
+            current_eval = evaluate_game(temp_board, depth-1, alpha, beta, True, max_colour)[1]
             if current_eval < min_eval:
                 min_eval = current_eval
                 best_move = move
-            alpha = min(beta, current_eval)
+            beta = min(beta, current_eval)
             if beta <= alpha:
                 break
         return best_move, min_eval

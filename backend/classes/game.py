@@ -15,9 +15,9 @@ class Game():
     
     def bot(self):
         #move = evaluate_random(self.legal_moves)
-        move = evaluate_game(self.board, 2, -float('inf'), float('inf'), True, self.turn)
+        move, eval = evaluate_game(self.board, 2, -float('inf'), float('inf'), True, 0)
+        #print(self.turn, eval)
         return move
-
 
     def game_over(self, repetition):
         if len(repetition) >= 3:
