@@ -1,6 +1,5 @@
 #! /bin/python3
 
-from copy import deepcopy
 from pieces import *
 from fen import *
 from squares import *
@@ -32,14 +31,22 @@ class Board():
         return new_board
 
     def move(self, move):
-        def _move(copy_board, original, new):
+        def _move(board, original, new):
+            copy_board = board.board
             o_rank, o_file = original
             t_rank, t_file = new
             piece = copy_board[o_rank][o_file]
+            """
+            print(piece.colour, board.get_info())
+            assert board.get_info()["side"] == piece.colour
+            """
             copy_board[t_rank][t_file] = copy_board[o_rank][o_file]
             copy_board[o_rank][o_file] = No_Piece()
-            if type(piece) == Pawn and Square.index_to_tile((o_rank, t_file)) == self.info["en_passant"]:
-                copy_board[o_rank][t_file] = No_Piece()
+            if type(piece) == Pawn:
+                if Square.index_to_tile((o_rank, t_file)) == self.info["en_passant"]:
+                    copy_board[o_rank][t_file] = No_Piece()
+                elif t_rank == 0 or t_rank == 7:
+                    copy_board[t_rank][t_file] = Queen(piece.colour)
             elif type(piece) == King:
                 direction = -1 if t_file - o_file > 0 else 1
                 o_rook_pos = len(copy_board[t_rank])-1 if t_file - o_file > 0 else 0
@@ -58,7 +65,7 @@ class Board():
         t_rank, t_file = new
         piece = self.board[o_rank][o_file]
         capture = self.board[t_rank][t_file]
-        self.board = _move(self.board_copy().board, original, new)
+        self.board = _move(self.board_copy(), original, new)
 
         #Changing board information
         self.info["side"] = BLACK if self.info["side"] else WHITE
@@ -121,7 +128,6 @@ class Board():
                     possible_moves = piece.non_attacking_moves(self, position)
                     for move in possible_moves:
                         moves.append(Square.index_to_tile(position) + Square.index_to_tile(move))
-        print("MOVES", moves)
         moves = self.validMoves(moves.copy(), colour)
         return moves
 
@@ -154,18 +160,15 @@ class Board():
         for move in range(len(moves)-1, -1, -1):
             temp_board = self.board_copy()
             temp_board.move(moves[move])
-            print("KINGPOS", temp_board.get_king_position())
             king_pos = temp_board.get_king_position()[colour]
 
             opp_moves = temp_board.get_attacking_moves(0 if colour else 1)
             if temp_board.isChecked(king_pos, opp_moves):
-                print("removed", moves[move])
                 moves.remove(moves[move])
         return moves
             
 
     def isChecked(self, king, opp_moves):
-        print(self)
         king = Square.index_to_tile(king)
         for move in opp_moves:
             if move[2:] == king:
@@ -183,6 +186,7 @@ class Board():
                     else:
                         eval_b += piece.value + piece.piece_square[rank][file]
         eval = eval_w - eval_b if max_player else eval_b - eval_w
+        #print(max_player, eval_w, eval_b, eval)
         return eval
 
 

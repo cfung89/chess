@@ -36,6 +36,7 @@ def board_move():
     resp = request.get_json()
     last = gamelog.find().sort({"_id":-1}).limit(1)
     fen = [entry for entry in last][0]["fen"]
+    print([i for i in gamelog.find()])
     game = Game(fen)
     game.move(resp['move'])
     with open("boards.txt", "a") as fp:
@@ -52,6 +53,7 @@ def board_move():
 
 @app.route('/botmove', methods=['GET'])
 def bot_move():
+    time.sleep(0.1)
     last = gamelog.find().sort({"_id":-1}).limit(1)
     fen = [entry for entry in last][0]["fen"]
     game = Game(fen)
