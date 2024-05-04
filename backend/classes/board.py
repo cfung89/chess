@@ -36,10 +36,7 @@ class Board():
             o_rank, o_file = original
             t_rank, t_file = new
             piece = copy_board[o_rank][o_file]
-            """
-            print(piece.colour, board.get_info())
             assert board.get_info()["side"] == piece.colour
-            """
             copy_board[t_rank][t_file] = copy_board[o_rank][o_file]
             copy_board[o_rank][o_file] = No_Piece()
             if type(piece) == Pawn:
@@ -186,7 +183,6 @@ class Board():
                     else:
                         eval_b += piece.value + piece.piece_square[rank][file]
         eval = eval_w - eval_b if max_player else eval_b - eval_w
-        #print(max_player, eval_w, eval_b, eval)
         return eval
 
 

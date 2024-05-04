@@ -16,7 +16,6 @@ class Game():
     def bot(self):
         #move = evaluate_random(self.legal_moves)
         move, eval = evaluate_game(self.board, 2, -float('inf'), float('inf'), True, 0)
-        print("FINAL MOVE", move, eval)
         return move
 
     def game_over(self, repetition):

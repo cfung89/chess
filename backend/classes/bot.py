@@ -27,7 +27,6 @@ def evaluate_game(board, depth, alpha, beta, max_player, max_colour):
         max_eval = -float('inf')
         for move in moves:
             temp_board = board.board_copy()
-            print(temp_board)
             temp_board.move(move)
             current_eval = evaluate_game(temp_board, depth-1, alpha, beta, False, max_colour)[1]
             if current_eval > max_eval:
