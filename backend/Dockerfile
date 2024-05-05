@@ -2,10 +2,8 @@ FROM python:3
 
 WORKDIR /backend
 
-COPY requirements.txt /../
+COPY . .
 
 RUN pip install --no-cache-dir -r requirements.txt
-
-COPY . .
 
 CMD ["python3", "-m", "flask", "--app", "server", "run"]
