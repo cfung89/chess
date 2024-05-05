@@ -1,6 +1,7 @@
 import { BASE } from "../Constants";
 
 export default function botMove() {
+    //Fetches the bot's move (GET request)
     async function fetchBotMove() {
         let obj;
         const res = await fetch(`${BASE}/botmove`);

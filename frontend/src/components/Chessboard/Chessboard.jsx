@@ -4,6 +4,7 @@ import Tile from "../Tile/Tile";
 import {VERTICAL_AXIS, HORIZONTAL_AXIS, GRID_SIZE,} from "../../Constants";
 import { Piece, Position } from "../../models";
 
+//Disables the right click menu
 document.addEventListener("contextmenu", (e) => {
 	e.preventDefault();
 });

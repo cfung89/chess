@@ -17,20 +17,20 @@ class Fen_String():
             file = 0
             while file < len(temp_board[rank]):
                 try:
-                    num = int(temp_board[rank][file])
+                    num = int(temp_board[rank][file])       #if a character is a number n, there are n spots with no piece in it
                     line.extend([No_Piece()]*num)
                     temp_board[rank] = temp_board[rank][:file] + "."*num + temp_board[rank][file+1:]
                     file += num
-                except ValueError:
+                except ValueError:      #Theres is a piece at that position.
                     piece_name = temp_board[rank][file]
                     piece = Piece.translate(piece_name)
                     line.append(piece)
                     if type(piece) == King:
-                        coords[piece.colour] = (rank, file)
+                        coords[piece.colour] = (rank, file)     #Saves king position
                     file += 1
             self.board.append(line)
-        self.info = {"side": WHITE if temp_info[0] == "w" else BLACK, "castling": temp_info[1], "en_passant": temp_info[2], "halfmove": int(temp_info[3]), "fullmove": int(temp_info[4])}
-        self.king_pos = coords
+        self.info = {"side": WHITE if temp_info[0] == "w" else BLACK, "castling": temp_info[1], "en_passant": temp_info[2], "halfmove": int(temp_info[3]), "fullmove": int(temp_info[4])}       #Saves board information
+        self.king_pos = coords      #Saves coordinates of the king
 
     def __repr__(self):
         string = str()
@@ -49,17 +49,17 @@ class Fen_String():
             for piece_name in rank:
                 if type(piece_name) == No_Piece:
                     num += 1
-                else:
+                else:       #If there is a piece at that position
                     if num:
-                        fen_string += str(num)
+                        fen_string += str(num)      #Adds the number of No_Pieces
                         num = 0
-                    fen_string += piece_name.name
-            if num:
+                    fen_string += piece_name.name   #Adds the piece name
+            if num:     #Num is the number of empty positions
                 fen_string += str(num)
                 num = 0
             fen_string += "/"
         fen_string = fen_string[:-1]
-        information = list(info.values())
+        information = list(info.values())      #Adds board information
         fen_string += " w" if information[0] else " b"
         for i in information[1:]:
             fen_string += " " + str(i)
@@ -67,7 +67,7 @@ class Fen_String():
 
 
 if __name__ == "__main__":
-    #Testing code
+    """Testing code for Fen_String class"""
     a = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     print(a)
     board = Fen_String(a)

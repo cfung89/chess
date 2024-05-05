@@ -1,4 +1,5 @@
 #! /bin/python3
+"""Initial tests. These tests may no longer be valid anymore since the class was modified a lot since then."""
 
 import sys
 sys.path.insert(1, './classes')

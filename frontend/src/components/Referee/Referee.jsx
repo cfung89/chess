@@ -4,7 +4,6 @@ import { Piece, Position } from "../../models";
 import { PieceType, TeamType } from "../../Types";
 import Chessboard from "../Chessboard/Chessboard";
 import postMove from "../../server/Post";
-import getMoves from "../../server/GetMoves";
 import start from "../../server/Start";
 import botMove from "../../server/BotMove";
 import { HORIZONTAL_AXIS } from "../../Constants";
@@ -23,7 +22,7 @@ export default function Referee() {
         if (playedPiece.team === TeamType.OUR && board.totalTurns % 2 !== 1) return false;
         if (playedPiece.team === TeamType.OPPONENT && board.totalTurns % 2 !== 0) return false;
 
-        // Bot move
+        // Bot move (the player cannot make a move for black/the bot)
         if (!bot) {
             if (playedPiece.team === TeamType.OPPONENT && board.totalTurns % 2 !== 1) return false;
         }
@@ -123,13 +122,14 @@ export default function Referee() {
     }
 
     if (board.totalTurns % 2 !== 1) {
-        const move = botMove();
+        //When it is black's move
+        const move = botMove();     //Makes a GET request to the server, to get the bot's move
         move.then((value) => {
-            const origPos = new Position(HORIZONTAL_AXIS.indexOf(value.move[0]), parseInt(value.move[1])-1);
+            const origPos = new Position(HORIZONTAL_AXIS.indexOf(value.move[0]), parseInt(value.move[1])-1);    //Converts the response of the request to the correct format
             const newPos = new Position(HORIZONTAL_AXIS.indexOf(value.move[2]), parseInt(value.move[3])-1);
-            const currentPiece = board.pieces.find((p) => p.samePosition(origPos));
+            const currentPiece = board.pieces.find((p) => p.samePosition(origPos));     //Gets the piece that is being moved
             if (currentPiece) {
-                const success = playMove(currentPiece.clone(), newPos, true);
+                const success = playMove(currentPiece.clone(), newPos, true);       //Changes the piece's position
             }
         });
     }

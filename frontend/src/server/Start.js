@@ -1,6 +1,7 @@
 const BASE = "http://127.0.0.1:5000/";
 
 export default function start() {
+    //Makes a POST request to the server, and starts a new game
     const fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
     fetch(`${BASE}/create`, {

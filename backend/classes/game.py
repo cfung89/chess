@@ -6,17 +6,23 @@ from bot import *
 from squares import *
 
 class Game():
+    """Game class"""
+
     def __init__(self, fen):
         self.board = Board(fen_str=fen)
         self.turn = self.board.get_info()["side"]
         self.legal_moves = self.board.get_legal_moves(self.turn)
 
     def move(self, move):
+        """Makes a move on the board"""
         self.board.move(move)
     
     def bot(self):
+        """Gets the bot's best calculated move"""
         #move = evaluate_random(self.legal_moves)
-        move, eval = evaluate_game(self.board, 2, -float('inf'), float('inf'), True)
+        move, eval = evaluate_game(self.board, 2, -float('inf'), float('inf'), True)        #Evaluates the board and returns the best move for the bot
+        
+        #Checks if the bot chose a castling move. We have to convert the squares for the frontend.
         orig = Square.tile_to_index(move[:2])
         new = list(Square.tile_to_index(move[2:]))
         if type(self.board.board[orig[0]][orig[1]]) == King:
@@ -29,9 +35,11 @@ class Game():
         return move
     
     def game_over(self, repetition):
+        """Returns the state of the game (if it is over)"""
         return self.board.game_over(repetition)
 
     def game_info(self):
+        """Gets certain information of the board and the game, for the server to send back to the frontend."""
         new_fen = Fen_String.encryptFen(self.board)
         fen_board = new_fen.split()[0]
 
