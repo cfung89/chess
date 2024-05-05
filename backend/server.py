@@ -39,6 +39,9 @@ def board_move():
     game = Game(fen)
     game.move(resp['move'])
 
+    with open("boards.txt", "a") as fp:
+        print(game.board, file=fp)
+
     new_fen, info, legal_moves, response = game.game_info()
 
     gamelog.insert_one({"fen": new_fen, "info": info, "moves": legal_moves})
@@ -64,12 +67,9 @@ def bot_move():
 
 @app.route('/legalmoves', methods=['GET'])
 def piece_move():
-    try:
-        last = gamelog.find().sort({"_id":-1}).limit(1)
-        legal_moves = [entry for entry in last][0]["moves"]
-    except IndexError:
-        game = Game("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-        legal_moves = game.legal_moves
+    time.sleep(0.1)
+    last = gamelog.find().sort({"_id":-1}).limit(1)
+    legal_moves = [entry for entry in last][0]["moves"]
     return jsonify(legal_moves), 200
 
 

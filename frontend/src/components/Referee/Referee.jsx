@@ -121,16 +121,19 @@ export default function Referee() {
     }
 
     if (board.totalTurns % 2 !== 1) {
-        const o = board.pieces;
-        const move = botMove();
-        move.then((value) => {
-            const origPos = new Position(HORIZONTAL_AXIS.indexOf(value.move[0]), parseInt(value.move[1])-1);
-            const newPos = new Position(HORIZONTAL_AXIS.indexOf(value.move[2]), parseInt(value.move[3])-1);
-            const currentPiece = board.pieces.find((p) => p.samePosition(origPos));
-            if (currentPiece) {
-                const success = playMove(currentPiece.clone(), newPos, true);
-            }
-        });
+        let success = false
+        while (!success) {
+            const move = botMove();
+            move.then((value) => {
+                const origPos = new Position(HORIZONTAL_AXIS.indexOf(value.move[0]), parseInt(value.move[1])-1);
+                const newPos = new Position(HORIZONTAL_AXIS.indexOf(value.move[2]), parseInt(value.move[3])-1);
+                const currentPiece = board.pieces.find((p) => p.samePosition(origPos));
+                if (currentPiece) {
+                    success = playMove(currentPiece.clone(), newPos, true);
+                    if (!success) {console.log("Unsuccessful move")}
+                }
+            });
+        }
     }
 
     //console.log(board)

@@ -31,67 +31,65 @@ class Board():
         return new_board
 
     def move(self, move):
-        def _move(board, original, new):
+        def _move(board, o_rank, o_file, t_rank, t_file):
             copy_board = board.board
-            o_rank, o_file = original
-            t_rank, t_file = new
             piece = copy_board[o_rank][o_file]
-            assert board.get_info()["side"] == piece.colour
             copy_board[t_rank][t_file] = copy_board[o_rank][o_file]
             copy_board[o_rank][o_file] = No_Piece()
+            board.board = copy_board
             if type(piece) == Pawn:
                 if Square.index_to_tile((o_rank, t_file)) == self.info["en_passant"]:
                     copy_board[o_rank][t_file] = No_Piece()
                 elif t_rank == 0 or t_rank == 7:
                     copy_board[t_rank][t_file] = Queen(piece.colour)
             elif type(piece) == King:
-                direction = -1 if t_file - o_file > 0 else 1
-                o_rook_pos = len(copy_board[t_rank])-1 if t_file - o_file > 0 else 0
-                rook_pos = o_rook_pos
-                if abs(t_file - o_file) == 2:
-                    rook = copy_board[t_rank][o_rook_pos]
-                    assert type(rook) == Rook
-                    while type(copy_board[t_rank][rook_pos]) != King:
-                        rook_pos += direction
-                    copy_board[t_rank][rook_pos+direction] = copy_board[t_rank][o_rook_pos]
-                    copy_board[t_rank][o_rook_pos] = No_Piece()
+                if t_file - o_file == 2 and piece.colour:
+                    copy_board = _move(board.board_copy(), 7, 7, 7, 5)
+                elif t_file - o_file == -2 and piece.colour:
+                    copy_board = _move(board.board_copy(), 7, 0, 7, 3)
+                elif t_file - o_file == 2 and not piece.colour:
+                    copy_board = _move(board.board_copy(), 0, 7, 0, 5)
+                elif t_file - o_file == -2 and not piece.colour:
+                    copy_board = _move(board.board_copy(), 0, 0, 0, 3)
             return copy_board
-        original = Square.tile_to_index(move[:2])
-        new = Square.tile_to_index(move[2:])
-        o_rank, o_file = original
-        t_rank, t_file = new
+        o_rank, o_file = Square.tile_to_index(move[:2])
+        t_rank, t_file = Square.tile_to_index(move[2:])
         piece = self.board[o_rank][o_file]
         capture = self.board[t_rank][t_file]
-        self.board = _move(self.board_copy(), original, new)
+        if type(piece) == King:
+            if t_file - o_file == 3:
+                t_file = 6
+            elif t_file - o_file == -4:
+                t_file = 2
+        self.board = _move(self.board_copy(), o_rank, o_file, t_rank, t_file)
 
         #Changing board information
         self.info["side"] = BLACK if self.info["side"] else WHITE
+
         if type(piece) == Pawn:
-            if t_rank - o_rank == 2:
+            if abs(t_rank - o_rank) == 2:
                 self.info["en_passant"] = move[2:]
             else:
                 self.info["en_passant"] = "-"
         elif type(piece) == King:
             if self.info["castling"] != "-":
-                if str(piece) in self.info["castling"]:
-                    if str(piece).isupper():
-                        self.info["castling"].replace("KQ", "")
-                    else:
-                        self.info["castling"].replace("kq", "")
+                if str(piece).isupper():
+                    self.info["castling"].replace("KQ", "")
+                else:
+                    self.info["castling"].replace("kq", "")
                 if not self.info["castling"]:
                     self.info["castling"] = "-"
             self.king_pos[piece.colour] = (t_rank, t_file)
         elif type(piece) == Rook:
             if self.info["castling"] != "-":
-                if str(piece) in self.info["castling"]:
-                    if str(piece).isupper() and o_file >= 4:
-                        self.info["castling"].replace("K", "")
-                    if str(piece).isupper() and o_file <= 3:
-                        self.info["castling"].replace("Q", "")
-                    if str(piece).islower() and o_file >= 4:
-                        self.info["castling"].replace("k", "")
-                    else:
-                        self.info["castling"].replace("q", "")
+                if o_rank == 7 and o_file == 7:
+                    self.info["castling"].replace("K", "")
+                elif o_rank == 7 and o_file == 0:
+                    self.info["castling"].replace("Q", "")
+                elif o_rank == 0 and o_file == 7:
+                    self.info["castling"].replace("k", "")
+                elif o_rank == 0 and o_file == 0:
+                    self.info["castling"].replace("q", "")
                 if not self.info["castling"]:
                     self.info["castling"] = "-"
             
@@ -104,7 +102,7 @@ class Board():
             self.info["fullmove"] += 1
 
     def get_attacking_moves(self, colour):
-        moves = []
+        moves = list()
         for rank in range(len(self.board)):
             for file in range(len(self.board[rank])):
                 piece = self.board[rank][file]
@@ -113,45 +111,48 @@ class Board():
                     possible_moves = piece.generate_moves(self, position)
                     for move in possible_moves:
                         moves.append(Square.index_to_tile(position) + Square.index_to_tile(move))
+        moves = self.castling(moves.copy(), colour)
+        self.attacking_moves = moves
         return moves
 
     def get_legal_moves(self, colour):
-        moves = self.get_attacking_moves(colour)
+        moves = list()
         for rank in range(len(self.board)):
             for file in range(len(self.board[rank])):
                 piece = self.board[rank][file]
-                if type(piece) == Pawn and piece.colour == colour:
+                if type(piece) != No_Piece and piece.colour == colour:
                     position = (rank, file)
-                    possible_moves = piece.non_attacking_moves(self, position)
+                    if type(piece) == Pawn:
+                        possible_moves = piece.non_attacking_moves(self, position)
+                        for move in possible_moves:
+                            moves.append(Square.index_to_tile(position) + Square.index_to_tile(move))
+                    possible_moves = piece.generate_moves(self, position)
                     for move in possible_moves:
                         moves.append(Square.index_to_tile(position) + Square.index_to_tile(move))
+        moves = self.castling(moves.copy(), colour)
         moves = self.validMoves(moves.copy(), colour)
+        self.legal_moves = moves
         return moves
 
-    def castling(self, white, black):
-        board = self.board
+    def castling(self, moves, colour):
         castle_info = self.info["castling"]
-        for colour in (WHITE, BLACK):
-            full = "KQ" if colour else "kq"
-            king_x, king_y = self.get_king_position()[colour]
-            for move in set(full).intersection(set(castle_info)):
-                direction = 1 if move.lower() == "k" else -1
-                rook_y = king_y + direction
-                piece = board[king_x][rook_y]
-                success = True
-                while type(piece) != Rook:
-                    if type(piece) == No_Piece:
-                        rook_y += direction
-                        piece = board[king_x][rook_y]
-                    else:
-                        success = False
-                        break
-                if success:
-                    if colour:
-                        white[(king_x, king_y)].append((king_x, rook_y-1 if direction == 1 else rook_y+2))
-                    else:
-                        black[(king_x, king_y)].append((king_x, rook_y-1 if direction == 1 else rook_y+2))
-        return white, black
+        full = "KQ" if colour else "kq"
+        king_x, king_y = self.king_pos[colour]
+        for move in set(full).intersection(set(castle_info)):
+            r_dir, rook_x, k_dir = 0, 0, 0
+            if move.lower() == "k":
+                rook_x = 7
+                r_dir = -2
+                k_dir = 2
+            else:
+                rook_x = 0
+                r_dir = 3
+                k_dir = -2
+            r_move = Square.index_to_tile((king_x, rook_x)) + Square.index_to_tile((king_x, rook_x + r_dir))
+            k_move = Square.index_to_tile((king_x, king_y)) + Square.index_to_tile((king_x, king_y + k_dir//2))
+            if r_move in moves and k_move in moves:
+                moves.append(Square.index_to_tile((king_x, king_y)) + Square.index_to_tile((king_x, king_y + k_dir)))
+        return moves
     
     def validMoves(self, moves, colour):
         for move in range(len(moves)-1, -1, -1):
@@ -185,6 +186,24 @@ class Board():
         eval = eval_w - eval_b if max_player else eval_b - eval_w
         return eval
 
+    def game_over(self, repetition=[]):
+        if len(repetition) >= 3:
+            return 4        #draw by repetition
+        
+        turn = self.info["side"]
+        king = self.king_pos[turn]
+
+        if self.isChecked(king, self.get_attacking_moves(0 if turn else 1)):
+            if not self.legal_moves:       #change the condition
+                return 1        #checkmate
+            else:
+                return 0
+        elif not self.legal_moves:
+            return 2        #stalemate
+
+        if self.info["halfmove"] >= 100:        #and side to move has at least one legal move
+            return 3    #50-move draw
+        return 0
 
 if __name__ == "__main__":
     ex = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"

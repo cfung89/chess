@@ -3,6 +3,7 @@
 from board import *
 from pieces import *
 from bot import *
+from squares import *
 
 class Game():
     def __init__(self, fen):
@@ -15,32 +16,20 @@ class Game():
     
     def bot(self):
         #move = evaluate_random(self.legal_moves)
-        move, eval = evaluate_game(self.board, 2, -float('inf'), float('inf'), True, 0)
+        move, eval = evaluate_game(self.board, 2, -float('inf'), float('inf'), True)
+        orig = Square.tile_to_index(move[:2])
+        new = list(Square.tile_to_index(move[2:]))
+        if type(self.board.board[orig[0]][orig[1]]) == King:
+            if new[1] - orig[1] == 2:
+                new[1] = 7
+                move = move[:2] + Square.index_to_tile(new)
+            elif new[1] - orig[1] == -2:
+                new[1] = 0
+                move = move[:2] + Square.index_to_tile(new)
         return move
-
+    
     def game_over(self, repetition):
-        if len(repetition) >= 3:
-            print("repetition")
-            return 4        #draw by repetition
-        
-        king = self.board.get_king_position()[self.turn]
-
-        if self.board.isChecked(king, self.board.get_attacking_moves(0 if self.turn else 1)):
-            if not self.legal_moves:       #change the condition
-                print("checkmate")
-                return 1        #checkmate
-            else:
-                print("check")
-                return 0
-        elif not self.legal_moves:
-            print("stalemate")
-            return 2        #stalemate
-
-        if self.board.info["halfmove"] >= 100:        #and side to move has at least one legal move
-            print("draw")
-            return 3    #50-move draw
-        print("nothing")
-        return 0
+        return self.board.game_over(repetition)
 
     def game_info(self):
         new_fen = Fen_String.encryptFen(self.board)

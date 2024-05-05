@@ -15,11 +15,16 @@ def evaluate_random(moves):
         return None
     return chosen_move
 
-def evaluate_game(board, depth, alpha, beta, max_player, max_colour):
+def evaluate_game(board, depth, alpha, beta, max_player):
     """Minimax algorithm with alpha-beta pruning"""
     moves = board.get_legal_moves(not max_player)
+    game_over = board.game_over()
     if depth == 0 or not len(moves):
         return None, board.evaluate_board(not max_player)
+    elif game_over == 1:
+        return None, 30000
+    elif game_over == 2 or game_over == 3:
+        return None, 0
 
     best_move = choice(moves)
 
@@ -28,11 +33,11 @@ def evaluate_game(board, depth, alpha, beta, max_player, max_colour):
         for move in moves:
             temp_board = board.board_copy()
             temp_board.move(move)
-            current_eval = evaluate_game(temp_board, depth-1, alpha, beta, False, max_colour)[1]
+            current_eval = evaluate_game(temp_board, depth-1, alpha, beta, False)[1]
             if current_eval > max_eval:
                 max_eval = current_eval
                 best_move = move
-            alpha = max(alpha, current_eval)
+            alpha = max(alpha, max_eval)
             if beta <= alpha:
                 break
         return best_move, max_eval
@@ -41,11 +46,11 @@ def evaluate_game(board, depth, alpha, beta, max_player, max_colour):
         for move in moves:
             temp_board = board.board_copy()
             temp_board.move(move)
-            current_eval = evaluate_game(temp_board, depth-1, alpha, beta, True, max_colour)[1]
+            current_eval = evaluate_game(temp_board, depth-1, alpha, beta, True)[1]
             if current_eval < min_eval:
                 min_eval = current_eval
                 best_move = move
-            beta = min(beta, current_eval)
+            beta = min(beta, min_eval)
             if beta <= alpha:
                 break
         return best_move, min_eval
