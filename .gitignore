@@ -1,6 +1,7 @@
 __pycache__/
 backend/__pycache__
 backend/classes/__pycache__
+backend/boards.txt*
 *.pyc
 
 # Logs
