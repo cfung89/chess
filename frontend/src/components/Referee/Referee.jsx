@@ -22,10 +22,12 @@ export default function Referee() {
         // Prevent the inactive team from playing
         if (playedPiece.team === TeamType.OUR && board.totalTurns % 2 !== 1) return false;
         if (playedPiece.team === TeamType.OPPONENT && board.totalTurns % 2 !== 0) return false;
+
         // Bot move
         if (!bot) {
             if (playedPiece.team === TeamType.OPPONENT && board.totalTurns % 2 !== 1) return false;
         }
+
         let playedMoveIsValid = false;
 
         const validMove = playedPiece.possibleMoves?.some(m => m.samePosition(destination));
@@ -121,19 +123,15 @@ export default function Referee() {
     }
 
     if (board.totalTurns % 2 !== 1) {
-        let success = false
-        while (!success) {
-            const move = botMove();
-            move.then((value) => {
-                const origPos = new Position(HORIZONTAL_AXIS.indexOf(value.move[0]), parseInt(value.move[1])-1);
-                const newPos = new Position(HORIZONTAL_AXIS.indexOf(value.move[2]), parseInt(value.move[3])-1);
-                const currentPiece = board.pieces.find((p) => p.samePosition(origPos));
-                if (currentPiece) {
-                    success = playMove(currentPiece.clone(), newPos, true);
-                    if (!success) {console.log("Unsuccessful move")}
-                }
-            });
-        }
+        const move = botMove();
+        move.then((value) => {
+            const origPos = new Position(HORIZONTAL_AXIS.indexOf(value.move[0]), parseInt(value.move[1])-1);
+            const newPos = new Position(HORIZONTAL_AXIS.indexOf(value.move[2]), parseInt(value.move[3])-1);
+            const currentPiece = board.pieces.find((p) => p.samePosition(origPos));
+            if (currentPiece) {
+                const success = playMove(currentPiece.clone(), newPos, true);
+            }
+        });
     }
 
     //console.log(board)

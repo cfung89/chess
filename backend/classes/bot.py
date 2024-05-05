@@ -20,11 +20,11 @@ def evaluate_game(board, depth, alpha, beta, max_player):
     moves = board.get_legal_moves(not max_player)
     game_over = board.game_over()
     if depth == 0 or not len(moves):
-        return None, board.evaluate_board(not max_player)
+        return "", board.evaluate_board(not max_player)
     elif game_over == 1:
-        return None, 30000
+        return "", 30000
     elif game_over == 2 or game_over == 3:
-        return None, 0
+        return "", 0
 
     best_move = choice(moves)
 

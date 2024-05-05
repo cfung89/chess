@@ -58,7 +58,7 @@ def bot_move():
     fen = [entry for entry in last][0]["fen"]
     game = Game(fen)
     botmove = game.bot()
-    if botmove is not None:
+    if botmove != "":
         move = {"move": botmove} 
         return jsonify(move), 200
     else:
