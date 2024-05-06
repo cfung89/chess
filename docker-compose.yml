@@ -1,10 +1,9 @@
 services:
   site:
-    web:
-      build: ./frontend
-      network_mode: "host"
-      depends_on:
-        - server
+    build: ./frontend
+    network_mode: "host"
+    depends_on:
+      - server
 
   server:
     build: ./backend
