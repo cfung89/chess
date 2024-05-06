@@ -99,3 +99,6 @@ npm run dev
 
 ## Website
 To start playing, open the website [http://localhost:5173/](http://localhost:5173/) and start playing against the bot!
+
+## References
+* Frontend: I followed the tutorials in this playlist for the frontend: https://www.youtube.com/playlist?list=PLBmRxydnERkysOgOS917Ojc_-uisgb8Aj, and at his GitHub repository https://github.com/FrontendCodingYT/coding-projects/tree/b5320623b71bdae479797677c3eed556af61c3b1/reactjs-projects/chess-app
