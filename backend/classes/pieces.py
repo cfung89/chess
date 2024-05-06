@@ -98,7 +98,7 @@ class Pawn(Piece):
         board = board_obj.board
         rank, file = position[0], position[1]
         if self.colour:
-            for forward in range(2 if position[0]==6 else 1):
+            for forward in range(2 if position[0]==6 else 1):       #Pawns can only be pushed 2 squares forward if they are on their starting squares
                 rank -= 1
                 if rank >= 0 and type(board[rank][file]) == No_Piece:
                     na_moves.append((rank, file))

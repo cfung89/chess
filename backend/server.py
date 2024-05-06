@@ -6,7 +6,6 @@ import sys
 sys.path.insert(1, './classes')
 
 from game import *
-from fen import Fen_String
 from pymongo import MongoClient
 
 
@@ -40,9 +39,6 @@ def board_move():
     fen = [entry for entry in last][0]["fen"]
     game = Game(fen)
     game.move(resp['move'])
-
-    with open("boards.txt", "a") as fp:     #Saves the board to a txt file (for testing purposes only)
-        print(game.board, file=fp)
 
     new_fen, info, legal_moves, response = game.game_info()
 
