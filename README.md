@@ -104,7 +104,7 @@ To start playing, open the website [http://localhost:5173/](http://localhost:517
 The software was developed by Cyrus Y. H. Fung. It is distributed under the Apache License Version 2.0. Please refer to LICENSE or http://apache.org/licenses/ for details.
 
 ## Disclaimer
-The software is provided as-is with no warranty or support. We do not take any responsibility for any damage, loss of income, or any problems you might experience from using our software. If you have questions, you are encouraged to consult the paper and the source code. If you find our software useful, please cite our paper above.
+The software is provided as-is with no warranty or support. We do not take any responsibility for any damage, loss of income, or any problems you might experience from using our software. If you have questions, you are encouraged to consult the source code. If you find this software useful, please reference this repository.
 
 ## References
 * Frontend: I followed the tutorials in this playlist for the frontend: https://www.youtube.com/playlist?list=PLBmRxydnERkysOgOS917Ojc_-uisgb8Aj, and at his GitHub repository https://github.com/FrontendCodingYT/coding-projects/tree/b5320623b71bdae479797677c3eed556af61c3b1/reactjs-projects/chess-app
